@@ -30,10 +30,9 @@ int main()
   Stopwatch sw;
 
   sw.tic();
-  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("results/JetData.h5", 500, 0);   //hydro data file pointer
+  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("results/JetData.h5", 500, 1);   //hydro data file pointer
 
   double T_dec = 0.12;
-  //get grid information from OSCAR header
   double grid_t0 = 0.6;
   double grid_x0, grid_y0;
   grid_x0 = -13.0;
@@ -48,14 +47,18 @@ int main()
   double volume;  //volume of the cell
   volume = grid_dt*grid_dx*grid_dy;
   
-  FluidcellStatistic Fluidcellanalysis;
+  FluidcellStatistic Fluidcellanalysis(hydroinfo_ptr);
 
   fluidCell* fluidCellptr = new fluidCell();
   double e_local, temp_local, vx_local, vy_local, vz_local, tau_local, x_local, y_local;
-
+  
   for(int itime=0;itime<ntime;itime++) //loop over time evolution
   {
     tau_local = grid_t0 + itime*grid_dt;
+    Fluidcellanalysis.calculateAvgandStdtemperature(tau_local); 
+    Fluidcellanalysis.calculateAvgandStdflowvelocity(tau_local); 
+    Fluidcellanalysis.checkMomentumAnisotropy(tau_local);
+    /*
     for(int i=0;i<nx;i++) //loops over the transverse plane
     {
       x_local = grid_x0 + i*grid_dx;
@@ -73,13 +76,14 @@ int main()
            double v_perp = sqrt(vx_local*vx_local + vy_local*vy_local);
         
            Fluidcellanalysis.Countcellvolume(temp_local, tau_local*volume);
-           Fluidcellanalysis.calAvgV(temp_local, tau_local*volume, v_perp, e_local);
+           Fluidcellanalysis.calAvgVvsT(temp_local, tau_local*volume, v_perp, e_local);
         }
       }
     }
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local;
     cout<<"done!" <<endl ;
+    */
   }
 
   Fluidcellanalysis.OutputCellvolume("TvsCellvolume");
