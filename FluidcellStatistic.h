@@ -36,6 +36,7 @@ class FluidcellStatistic
         void calculateAvgandStdflowvelocity(double tau_local);
         void Countcellvolume(double temp_local, double volume);
         void OutputCellvolume(string filename);
+        void outputTempasTauvsX();
         void calAvgVvsT(double temp_local, double volume, double velocity, double ed);
         void outputAvgV(string filename);
 

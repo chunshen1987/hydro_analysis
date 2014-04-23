@@ -51,7 +51,9 @@ int main()
 
   fluidCell* fluidCellptr = new fluidCell();
   double e_local, temp_local, vx_local, vy_local, vz_local, tau_local, x_local, y_local;
+  //Fluidcellanalysis.outputTempasTauvsX();
   
+
   for(int itime=0;itime<ntime;itime++) //loop over time evolution
   {
     tau_local = grid_t0 + itime*grid_dt;
@@ -80,14 +82,15 @@ int main()
         }
       }
     }
+    */
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local;
     cout<<"done!" <<endl ;
-    */
   }
-
+ 
   Fluidcellanalysis.OutputCellvolume("TvsCellvolume");
   Fluidcellanalysis.outputAvgV("TvsAvgV");
+
 
   sw.toc();
   cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

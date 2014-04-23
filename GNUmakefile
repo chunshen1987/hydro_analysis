@@ -10,15 +10,13 @@
 ##			distclean	remove all objectsfiles and binaries
 ##  
 
-#CC := $(shell ../crank/configure_compiler_C++.sh)
-#CFLAGS= $(shell ../crank/configure_compiler_C++_Flags.sh)
-CC := g++
+CC := h5c++
 CFLAGS = -g
 
 RM		=	rm -f
 O               =       .o
-HDF5LD          = -I/usr/local/hdf5/include
-HDF5FLAGS       = -L/usr/local/hdf5/lib /usr/local/hdf5/lib/libhdf5_hl_cpp.a /usr/local/hdf5/lib/libhdf5_cpp.a /usr/local/hdf5/lib/libhdf5_hl.a /usr/local/hdf5/lib/libhdf5.a -lz -lm
+HDF5LD          = 
+HDF5FLAGS       = 
 LDFLAGS         =       $(CFLAGS)
 SYSTEMFILES     =       $(SRCGNU)
 
