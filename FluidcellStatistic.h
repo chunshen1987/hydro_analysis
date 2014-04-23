@@ -40,6 +40,7 @@ class FluidcellStatistic
         void calAvgVvsT(double temp_local, double volume, double velocity, double ed);
         void outputAvgV(string filename);
         void outputinverseReynoldsNumberasTauvsX();
+        void outputBulkinverseReynoldsNumberasTauvsX();
 
 };
 
