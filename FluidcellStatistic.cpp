@@ -387,3 +387,60 @@ void FluidcellStatistic::outputTempasTauvsX()
    delete fluidCellptr;
    return;
 }
+
+
+void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX()
+{
+   double grid_t0, grid_x0, grid_y0;
+   grid_t0 = 0.6;
+   grid_x0 = -13.0;
+   grid_y0 = -13.0;
+   double grid_dt, grid_dx, grid_dy;
+   grid_dt = 0.04;
+   grid_dx = 0.2;
+   grid_dy = 0.2;
+   int ntime = (int)((12.0 - grid_t0)/grid_dt) + 1;
+   int nx = (int)(abs(2*grid_x0)/grid_dx) + 1;
+   int ny = (int)(abs(2*grid_y0)/grid_dy) + 1;
+
+   double MAX = 1000.;
+
+   fluidCell* fluidCellptr = new fluidCell();
+   ofstream output;
+   output.open("results/inverseReynoldsNumberasTauvsX.dat");
+
+   for(int itime=0;itime<ntime;itime++) //loop over time evolution
+   {
+     double tau_local = grid_t0 + itime*grid_dt;
+     for(int i=0;i<nx;i++) //loops over the transverse plane
+     {
+       double x_local = grid_x0 + i*grid_dx;
+       double y_local = 0.0;
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local, fluidCellptr);
+
+       double pi2 =   fluidCellptr->pi[0][0]*fluidCellptr->pi[0][0] 
+                    + fluidCellptr->pi[1][1]*fluidCellptr->pi[1][1]
+                    + fluidCellptr->pi[2][2]*fluidCellptr->pi[2][2]
+                    + fluidCellptr->pi[3][3]*fluidCellptr->pi[3][3]
+                    - 2.*(  fluidCellptr->pi[0][1]*fluidCellptr->pi[0][1]
+                          + fluidCellptr->pi[0][2]*fluidCellptr->pi[0][2]
+                          + fluidCellptr->pi[0][3]*fluidCellptr->pi[0][3])
+                    + 2.*(  fluidCellptr->pi[1][2]*fluidCellptr->pi[1][2]
+                          + fluidCellptr->pi[1][3]*fluidCellptr->pi[1][3]
+                          + fluidCellptr->pi[2][3]*fluidCellptr->pi[2][3]);
+       
+       double inverseReynold;
+
+       if(pi2 >= 0)
+          inverseReynold = sqrt(pi2)/fluidCellptr->pressure;
+       else
+          inverseReynold = MAX;
+
+       output << inverseReynold << "    " ;
+     }
+     output << endl;
+   }
+   output.close();
+   delete fluidCellptr;
+   return;
+}

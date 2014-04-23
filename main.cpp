@@ -52,6 +52,7 @@ int main()
   fluidCell* fluidCellptr = new fluidCell();
   double e_local, temp_local, vx_local, vy_local, vz_local, tau_local, x_local, y_local;
   //Fluidcellanalysis.outputTempasTauvsX();
+  //Fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
   
 
   for(int itime=0;itime<ntime;itime++) //loop over time evolution
