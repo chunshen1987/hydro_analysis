@@ -51,17 +51,17 @@ int main()
 
   fluidCell* fluidCellptr = new fluidCell();
   double e_local, temp_local, vx_local, vy_local, vz_local, tau_local, x_local, y_local;
-  //Fluidcellanalysis.outputTempasTauvsX();
-  //Fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
+  Fluidcellanalysis.outputTempasTauvsX();
+  Fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
+  Fluidcellanalysis.outputKnudersonNumberasTauvsX();
   
-
+/*
   for(int itime=0;itime<ntime;itime++) //loop over time evolution
   {
     tau_local = grid_t0 + itime*grid_dt;
     Fluidcellanalysis.calculateAvgandStdtemperature(tau_local); 
     Fluidcellanalysis.calculateAvgandStdflowvelocity(tau_local); 
     Fluidcellanalysis.checkMomentumAnisotropy(tau_local);
-    /*
     for(int i=0;i<nx;i++) //loops over the transverse plane
     {
       x_local = grid_x0 + i*grid_dx;
@@ -83,15 +83,13 @@ int main()
         }
       }
     }
-    */
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local;
     cout<<"done!" <<endl ;
   }
- 
   Fluidcellanalysis.OutputCellvolume("TvsCellvolume");
   Fluidcellanalysis.outputAvgV("TvsAvgV");
-
+*/
 
   sw.toc();
   cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

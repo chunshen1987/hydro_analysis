@@ -389,6 +389,84 @@ void FluidcellStatistic::outputTempasTauvsX()
 }
 
 
+void FluidcellStatistic::outputKnudersonNumberasTauvsX()
+{
+   double grid_t0, grid_x0, grid_y0;
+   grid_t0 = 0.6;
+   grid_x0 = -13.0;
+   grid_y0 = -13.0;
+   double grid_dt, grid_dx, grid_dy;
+   grid_dt = 0.04;
+   grid_dx = 0.2;
+   grid_dy = 0.2;
+   int ntime = (int)((12.0 - grid_t0)/grid_dt) + 1;
+   int nx = (int)(abs(2*grid_x0)/grid_dx) + 1;
+   int ny = (int)(abs(2*grid_y0)/grid_dy) + 1;
+   
+   double eps = 1e-15;
+   double MAX = 1000.;
+
+   fluidCell* fluidCellptr = new fluidCell();
+   fluidCell* fluidCellptrt1 = new fluidCell();
+   fluidCell* fluidCellptrt2 = new fluidCell();
+   fluidCell* fluidCellptrx1 = new fluidCell();
+   fluidCell* fluidCellptrx2 = new fluidCell();
+   fluidCell* fluidCellptry1 = new fluidCell();
+   fluidCell* fluidCellptry2 = new fluidCell();
+
+   ofstream output;
+   output.open("results/KnudersonNumberasTauvsX.dat");
+
+   for(int itime=0;itime<ntime;itime++) //loop over time evolution
+   {
+     double tau_local = grid_t0 + itime*grid_dt;
+     for(int i=0;i<nx;i++) //loops over the transverse plane
+     {
+       double x_local = grid_x0 + i*grid_dx;
+       double y_local = 0.0;
+       double grid_dy = grid_dx;
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local, fluidCellptr);
+       hydroinfo_ptr->getHydroinfo(tau_local-grid_dt, x_local, y_local, fluidCellptrt1);
+       hydroinfo_ptr->getHydroinfo(tau_local+grid_dt, x_local, y_local, fluidCellptrt2);
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local-grid_dx, y_local, fluidCellptrx1);
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local+grid_dx, y_local, fluidCellptrx2);
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local-grid_dy, fluidCellptry1);
+       hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local+grid_dy, fluidCellptry2);
+       
+       double u0 = 1./sqrt(1. - fluidCellptr->vx*fluidCellptr->vx + fluidCellptr->vy*fluidCellptr->vy);
+       double u0t1 = 1./sqrt(1. - fluidCellptrt1->vx*fluidCellptrt1->vx + fluidCellptrt1->vy*fluidCellptrt1->vy);
+       double u0t2 = 1./sqrt(1. - fluidCellptrt2->vx*fluidCellptrt2->vx + fluidCellptrt2->vy*fluidCellptrt2->vy);
+       double u1x1 = fluidCellptrx1->vx/sqrt(1. - fluidCellptrx1->vx*fluidCellptrx1->vx + fluidCellptrx1->vy*fluidCellptrx1->vy);
+       double u1x2 = fluidCellptrx2->vx/sqrt(1. - fluidCellptrx2->vx*fluidCellptrx2->vx + fluidCellptrx2->vy*fluidCellptrx2->vy);
+       double u2y1 = fluidCellptry1->vy/sqrt(1. - fluidCellptry1->vx*fluidCellptry1->vx + fluidCellptry1->vy*fluidCellptry1->vy);
+       double u2y2 = fluidCellptry2->vy/sqrt(1. - fluidCellptry2->vx*fluidCellptry2->vx + fluidCellptry2->vy*fluidCellptry2->vy);
+
+       double d0u0 = (u0t2 - u0t1)/2./grid_dt;
+       double d1u1 = (u1x2 - u1x1)/2./grid_dx;
+       double d2u2 = (u2y2 - u2y1)/2./grid_dy;
+       double theta = (d0u0 + d1u1 + d2u2 + u0/tau_local);
+
+       double eta_s = 0.08;
+       double L_micro = 5*eta_s/(fabs(fluidCellptr->temperature) + eps);
+       double L_macro = 1/(fabs(theta) + eps);
+       double Knudsen = L_micro/L_macro;
+
+       output << Knudsen << "    " ;
+     }
+     output << endl;
+   }
+   output.close();
+   delete fluidCellptr;
+   delete fluidCellptrt1;
+   delete fluidCellptrt2;
+   delete fluidCellptrx1;
+   delete fluidCellptrx2;
+   delete fluidCellptry1;
+   delete fluidCellptry2;
+
+   return;
+}
+
 void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX()
 {
    double grid_t0, grid_x0, grid_y0;

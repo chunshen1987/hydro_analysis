@@ -39,6 +39,7 @@ class FluidcellStatistic
         void outputTempasTauvsX();
         void calAvgVvsT(double temp_local, double volume, double velocity, double ed);
         void outputAvgV(string filename);
+        void outputKnudersonNumberasTauvsX();
         void outputinverseReynoldsNumberasTauvsX();
         void outputBulkinverseReynoldsNumberasTauvsX();
 
