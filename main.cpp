@@ -20,12 +20,18 @@
 #include "Hydroinfo_h5.h"
 #include "Stopwatch.h"
 #include "FluidcellStatistic.h"
+#include "ParameterReader.h"
 
 using namespace std;
 
 
-int main()
+int main(int argc, char *argv[])
 {
+  ParameterReader paraRdr;
+  paraRdr.readFromFile("parameters.dat");
+  paraRdr.readFromArguments(argc, argv);
+  paraRdr.echo();
+
   Stopwatch sw;
 
   sw.tic();

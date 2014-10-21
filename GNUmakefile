@@ -26,9 +26,11 @@ ifeq "$(MAIN)" ""
 MAIN		=	hydro_analysis.e
 endif
 
-SRC		=	main.cpp Hydroinfo_h5.cpp FluidcellStatistic.cpp
+SRC		=	main.cpp Hydroinfo_h5.cpp FluidcellStatistic.cpp \
+                  ParameterReader.cpp arsenal.cpp
 
-INC		= 	Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h
+INC		= 	Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h \
+                  ParameterReader.h arsenal.h
 
 
 # -------------------------------------------------
@@ -75,7 +77,8 @@ install:	$(TARGET)
 		cp $(TARGET) $(INSTPATH)
 
 # --------------- Dependencies -------------------
-main.cpp : Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h
+main.cpp : Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h ParameterReader.h
 Hydroinfo_h5.cpp : Hydroinfo_h5.h
 FluidcellStatistic.cpp : FluidcellStatistic.h
-
+ParameterReader.cpp : ParameterReader.h arsenal.h
+arsenal.cpp : arsenal.h
