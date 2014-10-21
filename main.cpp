@@ -2,11 +2,10 @@
 //                      hydrodynamics analysis
 //                          photon emission 
 //
-//              author: Chun Shen <shen@mps.ohio-state.edu>
+//              author: Chun Shen <chunshen@physics.mcgill.ca>
 //
-//  This program calculates the photon emission from the relativistic
-//  heavy ion collision. It reads in viscous hydrodynamics results in 
-//  OSCAR format, which is achieved by the functions in readframe.cpp.
+//  This program load hydrodynamic evolution files and perform various
+//  kinds of analysis
 //  
 //
 //  To do in the future:

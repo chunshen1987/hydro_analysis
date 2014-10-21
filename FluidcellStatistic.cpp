@@ -391,6 +391,7 @@ void FluidcellStatistic::outputTempasTauvsX()
 
 void FluidcellStatistic::outputKnudersonNumberasTauvsX()
 {
+   double hbarC = 0.19733;
    double grid_t0, grid_x0, grid_y0;
    grid_t0 = 0.6;
    grid_x0 = -13.0;
@@ -415,7 +416,7 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX()
    fluidCell* fluidCellptry2 = new fluidCell();
 
    ofstream output;
-   output.open("results/KnudersonNumberasTauvsX.dat");
+   output.open("results/KnudsenNumberasTauvsX.dat");
 
    for(int itime=0;itime<ntime;itime++) //loop over time evolution
    {
@@ -447,7 +448,7 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX()
        double theta = (d0u0 + d1u1 + d2u2 + u0/tau_local);
 
        double eta_s = 0.08;
-       double L_micro = 5*eta_s/(fabs(fluidCellptr->temperature) + eps);
+       double L_micro = 5*eta_s/(fabs(fluidCellptr->temperature) + eps)*hbarC;
        double L_macro = 1/(fabs(theta) + eps);
        double Knudsen = L_micro/L_macro;
 
