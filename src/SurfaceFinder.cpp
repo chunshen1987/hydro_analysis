@@ -103,9 +103,9 @@ int SurfaceFinder::Find_full_hypersurface()
     
     fluidCell *fluidCellptr = new fluidCell();
   
+    //ofstream output_test1("decdat2.dat");
+    //ofstream output_test2("surface.dat");
 
-    ofstream output_test1("decdat2.dat");
-    ofstream output_test2("surface.dat");
     for(int itime = 0; itime < ntime; itime++) //loop over time evolution
     {
         double tau_local = grid_t0 + (itime + 0.5)*grid_dt;
@@ -136,7 +136,8 @@ int SurfaceFinder::Find_full_hypersurface()
                                << da_tau << "   " << da_x << "   " << da_y << "   " 
                                << fluidCellptr->temperature << "   " << fluidCellptr->vx << "   " << fluidCellptr->vy 
                                << endl;
-                        
+
+                        /* for testing  
                         output_test1 << tau_center << "   " << da_tau << "    " << da_x << "   " << da_y << "   "
                                      << fluidCellptr->vx << "   " << fluidCellptr->vy << "   " << 0.18 << "   " 
                                      << 0.0 << "   " << 0.11956 << "   " << 0.0 << "   " << 0.0 << "   " 
@@ -147,16 +148,17 @@ int SurfaceFinder::Find_full_hypersurface()
 
                         output_test2 << tau_center << "   " << tau_center << "   " 
                                      << x_center << "   " << y_center << "   " 
-                                     << x_center << "   " << x_center << "   " << x_center << endl;
-
+                                     << sqrt(x_center*x_center + y_center*y_center) 
+                                     << "   " << x_center << "   " << x_center << endl;
+                        */
                     }
                 }
             }
         }
     }
     output.close();
-    output_test1.close();
-    output_test2.close();
+    //output_test1.close();
+    //output_test2.close();
     
     delete fluidCellptr;
     delete cornelius_ptr;

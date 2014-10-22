@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
   surface_ptr->Find_full_hypersurface();
 
 
-
 /*  double T_dec = 0.12;
   double grid_t0 = 0.6;
   double grid_x0, grid_y0;

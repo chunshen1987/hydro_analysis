@@ -11,7 +11,7 @@
 ##  
 
 CC := h5c++
-CFLAGS = -g
+CFLAGS = -O3
 
 RM		=	rm -f
 O               =       .o
@@ -41,7 +41,7 @@ SRCFILES 	= 	$(SRC) $(INC) GNUmakefile
 OBJECTS		=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 			$(basename $(SRC))))
 TARGET		=	$(MAIN)
-INSTPATH	=	$(HOME)/local/bin
+INSTPATH	=	../
 
 # --------------- Pattern rules -------------------
 
