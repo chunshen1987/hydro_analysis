@@ -21,23 +21,30 @@
 #include "Stopwatch.h"
 #include "FluidcellStatistic.h"
 #include "ParameterReader.h"
+#include "SurfaceFinder.h"
 
 using namespace std;
 
 
 int main(int argc, char *argv[])
 {
-  ParameterReader paraRdr;
-  paraRdr.readFromFile("parameters.dat");
-  paraRdr.readFromArguments(argc, argv);
-  paraRdr.echo();
+  ParameterReader *paraRdr = new ParameterReader();
+  paraRdr->readFromFile("parameters.dat");
+  paraRdr->readFromArguments(argc, argv);
+  paraRdr->echo();
+
+  int load_viscous = paraRdr->getVal("load_viscous_info");
 
   Stopwatch sw;
 
   sw.tic();
-  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("results/JetData.h5", 500, 1);   //hydro data file pointer
+  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", 500, load_viscous);   //hydro data file pointer
+  SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
+  surface_ptr->Find_full_hypersurface();
 
-  double T_dec = 0.12;
+
+
+/*  double T_dec = 0.12;
   double grid_t0 = 0.6;
   double grid_x0, grid_y0;
   grid_x0 = -13.0;
@@ -59,7 +66,7 @@ int main(int argc, char *argv[])
   Fluidcellanalysis.outputTempasTauvsX();
   Fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
   Fluidcellanalysis.outputKnudersonNumberasTauvsX();
-  
+*/ 
 /*
   for(int itime=0;itime<ntime;itime++) //loop over time evolution
   {
