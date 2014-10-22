@@ -15,4 +15,4 @@ momentum anisotropy, Knudsen and inverse Reynold's number for hydrodynamic fluid
 
 
 To do:
- ... need to add cmake compile files
+* add cmake compile files
