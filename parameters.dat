@@ -1,0 +1,13 @@
+  T_dec = 0.12       # decoupling temperature for hydrodynamic simulation (GeV)
+
+  grid_t0 = 0.6      # starting time of the hydro (fm)
+  grid_x0 = -13.0    # grid boundary (fm)
+  grid_y0 = -13.0    # grid boundary (fm)
+
+  grid_dt = 0.04     # grid size in tau (fm)
+  grid_dx = 0.2      # grid size in x (fm)
+  grid_dy = 0.2      # grid size in y (fm)
+
+  load_viscous_info = 0  # switch to load dissipative information
+
+  T_cut = 0.165      # desired temperature for hyper-surface determination (GeV)
