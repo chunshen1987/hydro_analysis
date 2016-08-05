@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////
 //                      hydrodynamics analysis
-//                          photon emission 
 //
 //              author: Chun Shen <chunshen@physics.mcgill.ca>
+//              Copyright: Chun Shen 2014
 //
 //  This program load hydrodynamic evolution files and perform various
 //  kinds of analysis
@@ -11,36 +11,43 @@
 //  To do in the future:
 /////////////////////////////////////////////////////////////////////////
 
-#include<iostream>
-#include<sstream>
-#include<fstream>
-#include<cmath>
-#include<iomanip>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <iomanip>
 
-#include "Hydroinfo_h5.h"
-#include "Stopwatch.h"
-#include "FluidcellStatistic.h"
-#include "ParameterReader.h"
-#include "SurfaceFinder.h"
+#include "./Hydroinfo_h5.h"
+#include "./Stopwatch.h"
+#include "./FluidcellStatistic.h"
+#include "./ParameterReader.h"
+#include "./SurfaceFinder.h"
 
 using namespace std;
 
+int main(int argc, char *argv[]) {
+    ParameterReader *paraRdr = new ParameterReader();
+    paraRdr->readFromFile("parameters.dat");
+    paraRdr->readFromArguments(argc, argv);
+    paraRdr->echo();
 
-int main(int argc, char *argv[])
-{
-  ParameterReader *paraRdr = new ParameterReader();
-  paraRdr->readFromFile("parameters.dat");
-  paraRdr->readFromArguments(argc, argv);
-  paraRdr->echo();
+    int load_viscous = paraRdr->getVal("load_viscous_info");
 
-  int load_viscous = paraRdr->getVal("load_viscous_info");
+    Stopwatch sw;
 
-  Stopwatch sw;
+    sw.tic();
+    // hydro data file pointer
+    HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", 500,
+                                                 load_viscous);
 
-  sw.tic();
-  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", 500, load_viscous);   //hydro data file pointer
-  SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
-  surface_ptr->Find_full_hypersurface();
+    FluidcellStatistic fluidcellanalysis(hydroinfo_ptr, paraRdr);
+    double v4 = fluidcellanalysis.calculate_spacetime_4volume(0.155);
+    double v3 = fluidcellanalysis.calculate_hypersurface_3volume(0.155);
+    double vavg = fluidcellanalysis.calculate_average_tau(0.155);
+    cout << v4 << "  " << v3 << "  " << vavg << endl;
+    // construct freeze-out hyper-surface
+    // SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
+    // surface_ptr->Find_full_hypersurface();
 
 
 /*  double T_dec = 0.12;
@@ -102,10 +109,10 @@ int main(int argc, char *argv[])
   Fluidcellanalysis.outputAvgV("TvsAvgV");
 */
 
-  sw.toc();
-  cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
+    sw.toc();
+    cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
 
-  return(0);
+    return(0);
 }
 
 
