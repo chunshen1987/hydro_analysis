@@ -41,10 +41,9 @@ int main(int argc, char *argv[]) {
                                                  load_viscous);
 
     FluidcellStatistic fluidcellanalysis(hydroinfo_ptr, paraRdr);
-    double v4 = fluidcellanalysis.calculate_spacetime_4volume(0.155);
-    double v3 = fluidcellanalysis.calculate_hypersurface_3volume(0.155);
-    double vavg = fluidcellanalysis.calculate_average_tau(0.155);
-    cout << v4 << "  " << v3 << "  " << vavg << endl;
+    double T_cut = paraRdr->getVal("T_cut");
+    fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
+
     // construct freeze-out hyper-surface
     // SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
     // surface_ptr->Find_full_hypersurface();
