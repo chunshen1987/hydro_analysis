@@ -567,12 +567,14 @@ void FluidcellStatistic::analysis_hydro_volume_for_photon(double T_cut) {
     double V_3 = calculate_hypersurface_3volume(T_cut);
     double V_4 = calculate_spacetime_4volume(T_cut);
     double average_tau = calculate_average_tau(T_cut);
+    double average_T4 = calculate_average_temperature4(T_cut);
     stringstream output;
     output << "volume_info_for_photon_Tcut_" << T_cut << ".dat";
     ofstream of(output.str().c_str());
-    of << "# V_4  <tau>  V_3" << endl;
+    of << "# V_4  <tau>  V_3  <T_4>" << endl;
     of << scientific << setw(18) << setprecision(8)
-       << V_4 << "  " << average_tau << "  " << V_3 << endl;
+       << V_4 << "  " << average_tau << "  "
+       << V_3 << "  " << average_T4 << endl;
     of.close();
 }
 
@@ -662,6 +664,52 @@ double FluidcellStatistic::calculate_average_tau(double T_cut) {
     average_tau /= volume;
     delete fluidCellptr;
     return(average_tau);
+}
+
+double FluidcellStatistic::calculate_average_temperature4(double T_cut) {
+    // this function calculates the average <T^4> of the medium
+    // inside a give temperature T_cut [GeV]
+    // the output <T^4> is in [GeV^4]
+   
+    // first get hydro grid information
+    double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
+    double grid_tmax = hydroinfo_ptr->getHydrogridTaumax();
+    double grid_x0 = - hydroinfo_ptr->getHydrogridXmax();
+    double grid_y0 = - hydroinfo_ptr->getHydrogridYmax();
+    double grid_dt = 0.1;
+    double grid_dx = 0.2;
+    double grid_dy = 0.2;
+    int ntime = static_cast<int>((grid_tmax - grid_t0)/grid_dt) + 1;
+    int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
+    int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy) + 1;
+
+    fluidCell* fluidCellptr = new fluidCell();
+
+    double average_T4 = 0.0;
+    double volume = 0.0;
+    for (int itime = 0; itime < ntime; itime++) {
+        // loop over time evolution
+        double tau_local = grid_t0 + itime*grid_dt;
+        double volume_element = tau_local*grid_dt*grid_dx*grid_dy;
+        for (int i = 0; i < nx; i++) {
+            // loops over the transverse plane
+            double x_local = grid_x0 + i*grid_dx;
+            for (int j = 0; j < ny; j++) {
+                double y_local = grid_y0 + j*grid_dy;
+                hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local,
+                                            fluidCellptr);
+                double T_local = fluidCellptr->temperature;  // GeV
+                if (T_local > T_cut) {
+                    volume += volume_element;
+                    average_T4 += (
+                            T_local*T_local*T_local*T_local*volume_element);
+                }
+            }
+        }
+    }
+    average_T4 /= volume;
+    delete fluidCellptr;
+    return(average_T4);
 }
 
 double FluidcellStatistic::calculate_hypersurface_3volume(double T_cut) {

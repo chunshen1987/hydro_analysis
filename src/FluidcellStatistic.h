@@ -46,6 +46,7 @@ public:
     void analysis_hydro_volume_for_photon(double T_cut);
     double calculate_spacetime_4volume(double T_cut);
     double calculate_average_tau(double T_cut);
+    double calculate_average_temperature4(double T_cut);
     double calculate_hypersurface_3volume(double T_cut);
 };
 
