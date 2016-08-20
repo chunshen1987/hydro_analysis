@@ -4,4 +4,4 @@ grid_dy = 0.2      # grid size in y (fm)
 
 load_viscous_info = 0  # switch to load dissipative information
 
-T_cut = 0.165      # desired temperature for hyper-surface determination (GeV)
+T_cut = 0.155      # desired temperature for hyper-surface determination (GeV)

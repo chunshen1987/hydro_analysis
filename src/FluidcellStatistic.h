@@ -16,30 +16,21 @@ using namespace std;
 
 class FluidcellStatistic {
  private:
-    int nbin;
     HydroinfoH5 *hydroinfo_ptr;
     ParameterReader *paraRdr;
-    double t_i, t_f, df;
-    double *tempature_ptr;
-    double *fluidcellvolume_ptr;
-    double *flowVeclocity_ptr;
-    double *energyDensity_ptr;
+    double T_dec;
+    double hbarC;
 
-public:
+ public:
     FluidcellStatistic(HydroinfoH5* hydroinfo_ptr_in,
                        ParameterReader* paraRdr_in);
     ~FluidcellStatistic();
     void checkFreezeoutSurface(double Tdec);
-    double getTemperature(double tau_local, double x_local, double y_local);
-    void checkMomentumAnisotropy(double tau_local);
-    void calculateAvgandStdtemperature(double tau_local);
-    void calculateAvgandStdflowvelocity(double tau_local);
-    void Countcellvolume(double temp_local, double volume);
-    void OutputCellvolume(string filename);
+    void output_momentum_anisotropy_vs_tau();
+    void output_temperature_vs_tau();
+    void output_flowvelocity_vs_tau();
+    void output_temperature_vs_avg_utau();
     void outputTempasTauvsX();
-    void calAvgVvsT(double temp_local, double volume, double velocity,
-                    double ed);
-    void outputAvgV(string filename);
     void outputKnudersonNumberasTauvsX();
     void outputinverseReynoldsNumberasTauvsX();
     void outputBulkinverseReynoldsNumberasTauvsX();
