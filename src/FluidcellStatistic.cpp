@@ -120,7 +120,6 @@ void FluidcellStatistic::output_temperature_vs_tau() {
 }
 
 void FluidcellStatistic::output_flowvelocity_vs_tau() {
-    double avgV, stdV, avgVsurf;
     double grid_tau0 = hydroinfo_ptr->getHydrogridTau0();
     double grid_tauf = hydroinfo_ptr->getHydrogridTaumax();
     double grid_x0 = - hydroinfo_ptr->getHydrogridXmax();
@@ -131,21 +130,22 @@ void FluidcellStatistic::output_flowvelocity_vs_tau() {
     double grid_dt = 0.1;
 
     int nt = static_cast<int>((grid_tauf - grid_tau0)/grid_dt + 1);
-    int nx = static_cast<int>(abs(2*grid_x0)/grid_dx) + 1;
-    int ny = static_cast<int>(abs(2*grid_y0)/grid_dy) + 1;
+    int nx = static_cast<int>(abs(2.*grid_x0)/grid_dx) + 1;
+    int ny = static_cast<int>(abs(2.*grid_y0)/grid_dy) + 1;
 
     fluidCell* fluidCellptr = new fluidCell;
 
     ofstream output;
     output.open("results/tau_vs_v.dat", std::ofstream::app);
+    output << "# tau (fm)  V4 (fm^4)  <u^\tau>  theta" << endl;
 
     for (int it = 0; it < nt; it++) {
         double tau_local = grid_tau0 + it*grid_dt;
-        double edSum = 0.0;
-        double edSurfsum = 0.0;
-        double vSurfsum = 0.0;
-        double VSum = 0.0;
-        double VSumsq = 0.0;
+        double volume_element = tau_local*grid_dt*grid_dx*grid_dy;
+        double V4 = 0.0;
+        double avg_utau = 0.0;
+        double avg_theta = 0.0;
+        int count = 0;
         for (int i = 0; i < nx; i++) {
             // loops over the transverse plane
             double x_local = grid_x0 + i*grid_dx;
@@ -155,33 +155,31 @@ void FluidcellStatistic::output_flowvelocity_vs_tau() {
                                             fluidCellptr);
                 double temp_local = fluidCellptr->temperature;
                 if (temp_local > T_dec) {
-                    double e_local = fluidCellptr->ed;
+                    // inside freeze-out surface
                     double vx_local = fluidCellptr->vx;
                     double vy_local = fluidCellptr->vy;
                     double v_perp = sqrt(vx_local*vx_local + vy_local*vy_local);
                     double gamma = 1./sqrt(1. - v_perp*v_perp);
-                    edSum += gamma*e_local;
-                    VSum += gamma*e_local*v_perp;
-                    VSumsq += gamma*e_local*v_perp*v_perp;
-                    if (fabs(temp_local - T_dec) < 0.001) {
-                        vSurfsum += gamma*e_local*v_perp;
-                        edSurfsum += gamma*e_local;
-                    }
+
+                    double theta = compute_local_expansion_rate(
+                                                tau_local, x_local, y_local);
+                    avg_utau += gamma*volume_element;
+                    avg_theta += theta*volume_element;
+                    V4 += volume_element;
+                    count++;
                 }
             }
         }
-        if (fabs(edSum) < 1e-10) {
-            avgV = 0.0;
-            stdV = 0.0;
-            vSurfsum += 0.0;
+        if (count < 1) {
+            avg_utau = 1.0;
+            avg_theta = 0.0;
+            V4 = 0.0;
         } else {
-            avgV = VSum/edSum;
-            stdV = sqrt(VSumsq/edSum - avgV*avgV);
-            avgVsurf = vSurfsum/edSurfsum;
+            avg_utau = avg_utau/V4;
+            avg_theta = avg_theta/V4;
         }
-
-        output << tau_local << "   " << avgV << "   " << stdV 
-               << "   " << avgVsurf << endl;
+        output << tau_local << "   " << V4 << "  " << avg_utau << "  "
+               << avg_theta << endl;
     }
     return;
 }
@@ -192,16 +190,16 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
     double grid_x0 = - hydroinfo_ptr->getHydrogridXmax();
     double grid_y0 = - hydroinfo_ptr->getHydrogridYmax();
     
-    double grid_dx = 0.2;
-    double grid_dy = 0.2;
-    double grid_dt = 0.1;
+    double grid_dx = 0.1;
+    double grid_dy = 0.1;
+    double grid_dt = 0.05;
 
     int nt = static_cast<int>((grid_tauf - grid_tau0)/grid_dt + 1);
     int nx = static_cast<int>(abs(2*grid_x0)/grid_dx) + 1;
     int ny = static_cast<int>(abs(2*grid_y0)/grid_dy) + 1;
 
-    ofstream output;
-    output.open("results/T_vs_v.dat");
+    ofstream output("results/T_vs_v.dat");
+    output << "# T (GeV)  V (fm^4)  <u^\tau>  theta" << endl;
 
     int n_bin = 41;
     double T_max = 0.5;
@@ -209,10 +207,12 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
     double *T_bin_avg = new double[n_bin];
     double *V4 = new double[n_bin];
     double *avg_utau = new double[n_bin];
+    double *avg_theta = new double[n_bin];
     for (int i = 0; i < n_bin; i++) {
         T_bin_avg[i] = 0.0;
         V4[i] = 0.0;
-        avg_utau[i] = 1.0;
+        avg_utau[i] = 0.0;
+        avg_theta[i] = 0.0;
     }
 
     fluidCell* fluidCellptr = new fluidCell;
@@ -232,10 +232,13 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
                     double vy_local = fluidCellptr->vy;
                     double utau_local = 1./sqrt(1. - vx_local*vx_local 
                                                 - vy_local*vy_local);
+                    double theta_local = compute_local_expansion_rate(
+                                                tau_local, x_local, y_local);
                     int T_idx = static_cast<int>((temp_local - T_dec)/dT);
                     if (T_idx > 0 && T_idx < n_bin-1) {
                         T_bin_avg[T_idx] += temp_local*volume_element;
                         avg_utau[T_idx] += utau_local*volume_element;
+                        avg_theta[T_idx] += theta_local*volume_element;
                         V4[T_idx] += volume_element;
                     }
                 }
@@ -243,22 +246,26 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
         }
     }
     for (int i = 0; i < n_bin; i++) {
-        double T_bin, utau_bin;
+        double T_bin, utau_bin, theta_bin;
         if (fabs(T_bin_avg[i]) < 1e-10) {
             T_bin = T_dec + i*dT;
             utau_bin = 1.0;
+            theta_bin = 0.0;
         } else {
             T_bin = T_bin_avg[i]/(V4[i] + 1e-15);
             utau_bin = avg_utau[i]/(V4[i] + 1e-15);
+            theta_bin = avg_theta[i]/(V4[i] + 1e-15);
         }
         output << scientific << setw(18) << setprecision(8)
-               << T_bin << "   " << V4[i] << "  " << utau_bin << endl;
+               << T_bin << "   " << V4[i] << "  " << utau_bin << "  "
+               << theta_bin << endl;
     }
     output.close();
 
     delete[] T_bin_avg;
     delete[] V4;
     delete[] avg_utau;
+    delete[] avg_theta;
     delete fluidCellptr;
     
     return;
@@ -326,15 +333,12 @@ void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
 void FluidcellStatistic::outputTempasTauvsX() {
     double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
     double grid_x0 = hydroinfo_ptr->getHydrogridX0();
-    double grid_y0 = hydroinfo_ptr->getHydrogridY0();
     double grid_dt = 0.04;
     double grid_dx = 0.2;
-    double grid_dy = 0.2;
 
     int ntime = static_cast<int>(
             (hydroinfo_ptr->getHydrogridTaumax() - grid_t0)/grid_dt) + 1;
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
-    int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy) + 1;
 
     double tau_local;
     fluidCell* fluidCellptr = new fluidCell();
@@ -367,27 +371,16 @@ void FluidcellStatistic::outputTempasTauvsX() {
 void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
     double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
     double grid_x0 = hydroinfo_ptr->getHydrogridX0();
-    double grid_y0 = hydroinfo_ptr->getHydrogridY0();
 
     double grid_dt = 0.04;
     double grid_dx = 0.2;
-    double grid_dy = 0.2;
     int ntime = static_cast<int>(
             (hydroinfo_ptr->getHydrogridTaumax() - grid_t0)/grid_dt) + 1;
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
-    int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy) + 1;
    
     double eps = 1e-15;
-    double MAX = 1000.;
 
-    fluidCell* fluidCellptr = new fluidCell();
-    fluidCell* fluidCellptrt1 = new fluidCell();
-    fluidCell* fluidCellptrt2 = new fluidCell();
-    fluidCell* fluidCellptrx1 = new fluidCell();
-    fluidCell* fluidCellptrx2 = new fluidCell();
-    fluidCell* fluidCellptry1 = new fluidCell();
-    fluidCell* fluidCellptry2 = new fluidCell();
-
+    fluidCell* fluidCellptr = new fluidCell;
     ofstream output;
     output.open("results/KnudsenNumberasTauvsX.dat");
 
@@ -398,45 +391,11 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
             // loops over the transverse plane
             double x_local = grid_x0 + i*grid_dx;
             double y_local = 0.0;
-            double grid_dy = grid_dx;
+            double theta = compute_local_expansion_rate(tau_local,
+                                                        x_local, y_local);
+
             hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local,
                                         fluidCellptr);
-            hydroinfo_ptr->getHydroinfo(tau_local-grid_dt, x_local, y_local,
-                                        fluidCellptrt1);
-            hydroinfo_ptr->getHydroinfo(tau_local+grid_dt, x_local, y_local,
-                                        fluidCellptrt2);
-            hydroinfo_ptr->getHydroinfo(tau_local, x_local-grid_dx, y_local,
-                                        fluidCellptrx1);
-            hydroinfo_ptr->getHydroinfo(tau_local, x_local+grid_dx, y_local,
-                                        fluidCellptrx2);
-            hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local-grid_dy,
-                                        fluidCellptry1);
-            hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local+grid_dy,
-                                        fluidCellptry2);
-       
-            double u0 = 1./sqrt(1. - fluidCellptr->vx*fluidCellptr->vx
-                                + fluidCellptr->vy*fluidCellptr->vy);
-            double u0t1 = 1./sqrt(1. - fluidCellptrt1->vx*fluidCellptrt1->vx
-                                  + fluidCellptrt1->vy*fluidCellptrt1->vy);
-            double u0t2 = 1./sqrt(1. - fluidCellptrt2->vx*fluidCellptrt2->vx
-                                  + fluidCellptrt2->vy*fluidCellptrt2->vy);
-            double u1x1 = (fluidCellptrx1->vx
-                           /sqrt(1. - fluidCellptrx1->vx*fluidCellptrx1->vx
-                                 + fluidCellptrx1->vy*fluidCellptrx1->vy));
-            double u1x2 = (fluidCellptrx2->vx
-                           /sqrt(1. - fluidCellptrx2->vx*fluidCellptrx2->vx
-                                 + fluidCellptrx2->vy*fluidCellptrx2->vy));
-            double u2y1 = (fluidCellptry1->vy
-                           /sqrt(1. - fluidCellptry1->vx*fluidCellptry1->vx
-                                 + fluidCellptry1->vy*fluidCellptry1->vy));
-            double u2y2 = (fluidCellptry2->vy
-                           /sqrt(1. - fluidCellptry2->vx*fluidCellptry2->vx
-                                 + fluidCellptry2->vy*fluidCellptry2->vy));
-
-            double d0u0 = (u0t2 - u0t1)/2./grid_dt;
-            double d1u1 = (u1x2 - u1x1)/2./grid_dx;
-            double d2u2 = (u2y2 - u2y1)/2./grid_dy;
-            double theta = (d0u0 + d1u1 + d2u2 + u0/tau_local);
 
             double eta_s = 0.08;
             double L_micro = (5.*eta_s
@@ -450,27 +409,84 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
     }
     output.close();
     delete fluidCellptr;
+    return;
+}
+
+double FluidcellStatistic::compute_local_expansion_rate(
+                        double tau_local, double x_local, double y_local) {
+    // this function computes the local expansion rate at the given
+    // space-time point (tau_loca, x_local, y_local)
+    // theta = \patial_mu u^\mu + u^tau/tau
+
+    double grid_dt = 0.04;
+    double grid_dx = 0.2;
+    double grid_dy = 0.2;
+
+    fluidCell* fluidCellptr = new fluidCell;
+    fluidCell* fluidCellptrt1 = new fluidCell;
+    fluidCell* fluidCellptrt2 = new fluidCell;
+    fluidCell* fluidCellptrx1 = new fluidCell;
+    fluidCell* fluidCellptrx2 = new fluidCell;
+    fluidCell* fluidCellptry1 = new fluidCell;
+    fluidCell* fluidCellptry2 = new fluidCell;
+
+    hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local,
+                                fluidCellptr);
+    hydroinfo_ptr->getHydroinfo(tau_local-grid_dt, x_local, y_local,
+                                fluidCellptrt1);
+    hydroinfo_ptr->getHydroinfo(tau_local+grid_dt, x_local, y_local,
+                                fluidCellptrt2);
+    hydroinfo_ptr->getHydroinfo(tau_local, x_local-grid_dx, y_local,
+                                fluidCellptrx1);
+    hydroinfo_ptr->getHydroinfo(tau_local, x_local+grid_dx, y_local,
+                                fluidCellptrx2);
+    hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local-grid_dy,
+                                fluidCellptry1);
+    hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local+grid_dy,
+                                fluidCellptry2);
+    
+    double u0 = 1./sqrt(1. - fluidCellptr->vx*fluidCellptr->vx
+                        + fluidCellptr->vy*fluidCellptr->vy);
+    double u0t1 = 1./sqrt(1. - fluidCellptrt1->vx*fluidCellptrt1->vx
+                          + fluidCellptrt1->vy*fluidCellptrt1->vy);
+    double u0t2 = 1./sqrt(1. - fluidCellptrt2->vx*fluidCellptrt2->vx
+                          + fluidCellptrt2->vy*fluidCellptrt2->vy);
+    double u1x1 = (fluidCellptrx1->vx
+                   /sqrt(1. - fluidCellptrx1->vx*fluidCellptrx1->vx
+                         + fluidCellptrx1->vy*fluidCellptrx1->vy));
+    double u1x2 = (fluidCellptrx2->vx
+                   /sqrt(1. - fluidCellptrx2->vx*fluidCellptrx2->vx
+                         + fluidCellptrx2->vy*fluidCellptrx2->vy));
+    double u2y1 = (fluidCellptry1->vy
+                   /sqrt(1. - fluidCellptry1->vx*fluidCellptry1->vx
+                         + fluidCellptry1->vy*fluidCellptry1->vy));
+    double u2y2 = (fluidCellptry2->vy
+                   /sqrt(1. - fluidCellptry2->vx*fluidCellptry2->vx
+                         + fluidCellptry2->vy*fluidCellptry2->vy));
+
+    double d0u0 = (u0t2 - u0t1)/2./grid_dt;
+    double d1u1 = (u1x2 - u1x1)/2./grid_dx;
+    double d2u2 = (u2y2 - u2y1)/2./grid_dy;
+    double theta = (d0u0 + d1u1 + d2u2 + u0/tau_local);
+
+    delete fluidCellptr;
     delete fluidCellptrt1;
     delete fluidCellptrt2;
     delete fluidCellptrx1;
     delete fluidCellptrx2;
     delete fluidCellptry1;
     delete fluidCellptry2;
-
-    return;
+    return(theta);
 }
 
 void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
     double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
     double grid_x0 = hydroinfo_ptr->getHydrogridX0();
-    double grid_y0 = hydroinfo_ptr->getHydrogridY0();
     double grid_dt = 0.04;
     double grid_dx = 0.2;
-    double grid_dy = 0.2;
     int ntime = static_cast<int>(
             (hydroinfo_ptr->getHydrogridTaumax() - grid_t0)/grid_dt) + 1;
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
-    int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy) + 1;
 
     double MAX = 1000.;
 
@@ -518,16 +534,13 @@ void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
 void FluidcellStatistic::outputBulkinverseReynoldsNumberasTauvsX() {
     double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
     double grid_x0 = hydroinfo_ptr->getHydrogridX0();
-    double grid_y0 = hydroinfo_ptr->getHydrogridY0();
 
     double grid_dt = 0.04;
     double grid_dx = 0.2;
-    double grid_dy = 0.2;
 
     int ntime = static_cast<int>(
             (hydroinfo_ptr->getHydrogridTaumax() - grid_t0)/grid_dt) + 1;
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
-    int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy) + 1;
 
     fluidCell* fluidCellptr = new fluidCell();
     ofstream output;

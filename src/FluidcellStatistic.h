@@ -1,3 +1,4 @@
+// Copyright Chun Shen @ 2015
 #ifndef SRC_FLUIDCELLSTATISTIC_H_
 #define SRC_FLUIDCELLSTATISTIC_H_
 
@@ -26,6 +27,8 @@ class FluidcellStatistic {
                        ParameterReader* paraRdr_in);
     ~FluidcellStatistic();
     void checkFreezeoutSurface(double Tdec);
+    double compute_local_expansion_rate(double tau_local, double x_local,
+                                        double y_local);
     void output_momentum_anisotropy_vs_tau();
     void output_temperature_vs_tau();
     void output_flowvelocity_vs_tau();
