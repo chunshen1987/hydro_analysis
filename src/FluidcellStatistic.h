@@ -11,20 +11,23 @@
 #include <fstream>
 
 #include "./Hydroinfo_h5.h"
+#include "./Hydroinfo_MUSIC.h"
 #include "./ParameterReader.h"
 
 using namespace std;
 
 class FluidcellStatistic {
  private:
+    int hydro_type;
     HydroinfoH5 *hydroinfo_ptr;
+    Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
     ParameterReader *paraRdr;
     double T_dec;
     double hbarC;
+    double grid_dt, grid_dx, grid_dy;
 
  public:
-    FluidcellStatistic(HydroinfoH5* hydroinfo_ptr_in,
-                       ParameterReader* paraRdr_in);
+    FluidcellStatistic(void* hydroinfo_ptr_in, ParameterReader* paraRdr_in);
     ~FluidcellStatistic();
     void checkFreezeoutSurface(double Tdec);
     double compute_local_expansion_rate(double tau_local, double x_local,

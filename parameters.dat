@@ -1,7 +1,15 @@
-grid_dt = 0.04     # grid size in tau (fm)
-grid_dx = 0.2      # grid size in x (fm)
-grid_dy = 0.2      # grid size in y (fm)
+hydro_type = 2       # type of the hydro evolution file
+                     # 1: (2+1)D hydro VISH2+1 in hdf5 file
+                     # 2: (2+1)D hydro MUSIC (JF's format)
+                     # 3: (2+1)D hydro MUSIC (on regular grid CShen's format)
+                     # 4: (3+1)D hydro MUSIC (no grid CShen's format)
+hydro_nskip_tau = 3  # read in medium information every hydro_nskip_tau time
+                     # steps (only effective for hydro_type == 2)
+
+# lattice spacings to analysis the hydro medium
+grid_dt = 0.04       # lattice spacing in tau (fm)
+grid_dx = 0.2        # lattice spacing in x (fm)
+grid_dy = 0.2        # lattice spacing in y (fm)
 
 load_viscous_info = 0  # switch to load dissipative information
-
 T_cut = 0.155      # desired temperature for hyper-surface determination (GeV)

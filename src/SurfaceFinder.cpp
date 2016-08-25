@@ -12,19 +12,27 @@
 
 using namespace std;
 
-SurfaceFinder::SurfaceFinder(HydroinfoH5* hydroinfo_ptr_in,
+SurfaceFinder::SurfaceFinder(void* hydroinfo_ptr_in,
                              ParameterReader* paraRdr_in) {
-    hydroinfo_ptr = hydroinfo_ptr_in;
     paraRdr = paraRdr_in;
-
+    hydro_type = paraRdr->getVal("hydro_type");
+    if (hydro_type == 0) {
+        hydroinfo_ptr = (HydroinfoH5*) hydroinfo_ptr_in;
+    } else {
+        hydroinfo_MUSIC_ptr = (Hydroinfo_MUSIC*) hydroinfo_ptr_in;
+    }
     T_cut = paraRdr->getVal("T_cut");
 }
 
-SurfaceFinder::SurfaceFinder(HydroinfoH5* hydroinfo_ptr_in,
+SurfaceFinder::SurfaceFinder(void* hydroinfo_ptr_in,
                              ParameterReader* paraRdr_in, double T_cut_in) {
-    hydroinfo_ptr = hydroinfo_ptr_in;
     paraRdr = paraRdr_in;
-
+    hydro_type = paraRdr->getVal("hydro_type");
+    if (hydro_type == 0) {
+        hydroinfo_ptr = (HydroinfoH5*) hydroinfo_ptr_in;
+    } else {
+        hydroinfo_MUSIC_ptr = (Hydroinfo_MUSIC*) hydroinfo_ptr_in;
+    }
     T_cut = T_cut_in;
 }
 
@@ -43,21 +51,61 @@ bool SurfaceFinder::check_intersect(double T_cut, double tau, double x,
     double y_left = y - dy/2.;
     double y_right = y + dy/2.;
 
-    hydroinfo_ptr->getHydroinfo(tau_low, x_left, y_left, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_low, x_left, y_left, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_left, y_left, 0.0, tau_low,
+                                            fluidCellptr);
+    }
     cube[0][0][0] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_low, x_left, y_right, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_low, x_left, y_right, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_left, y_right, 0.0, tau_low,
+                                            fluidCellptr);
+    }
     cube[0][0][1] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_low, x_right, y_left, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_low, x_right, y_left, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_right, y_left, 0.0, tau_low,
+                                            fluidCellptr);
+    }
     cube[0][1][0] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_low, x_right, y_right, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_low, x_right, y_right, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_right, y_right, 0.0, tau_low,
+                                            fluidCellptr);
+    }
     cube[0][1][1] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_high, x_left, y_left, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_high, x_left, y_left, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_left, y_left, 0.0, tau_high,
+                                            fluidCellptr);
+    }
     cube[1][0][0] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_high, x_left, y_right, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_high, x_left, y_right, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_left, y_right, 0.0, tau_high,
+                                            fluidCellptr);
+    }
     cube[1][0][1] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_high, x_right, y_left, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_high, x_right, y_left, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_right, y_left, 0.0, tau_high,
+                                            fluidCellptr);
+    }
     cube[1][1][0] = fluidCellptr->temperature;
-    hydroinfo_ptr->getHydroinfo(tau_high, x_right, y_right, fluidCellptr);
+    if (hydro_type == 0) {
+        hydroinfo_ptr->getHydroinfo(tau_high, x_right, y_right, fluidCellptr);
+    } else {
+        hydroinfo_MUSIC_ptr->getHydroValues(x_right, y_right, 0.0, tau_high,
+                                            fluidCellptr);
+    }
     cube[1][1][1] = fluidCellptr->temperature;
 
     if ((T_cut - cube[0][0][0])*(cube[1][1][1] - T_cut) < 0.0)
@@ -74,9 +122,19 @@ int SurfaceFinder::Find_full_hypersurface() {
     ofstream output;
     output.open("hyper_surface_2+1d.dat");
 
-    double grid_t0 = hydroinfo_ptr->getHydrogridTau0();
-    double grid_x0 = hydroinfo_ptr->getHydrogridX0();
-    double grid_y0 = hydroinfo_ptr->getHydrogridY0();
+    double grid_tau0, grid_tauf, grid_x0, grid_y0;
+    if (hydro_type == 1) {
+        grid_tau0 = hydroinfo_ptr->getHydrogridTau0();
+        grid_tauf = hydroinfo_ptr->getHydrogridTaumax();
+        grid_x0 = hydroinfo_ptr->getHydrogridX0();
+        grid_y0 = hydroinfo_ptr->getHydrogridY0();
+    } else {
+        grid_tau0 = hydroinfo_MUSIC_ptr->get_hydro_tau0();
+        grid_tauf = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
+        grid_x0 = (- hydroinfo_MUSIC_ptr->get_hydro_x_max()
+                   + hydroinfo_MUSIC_ptr->get_hydro_dx());
+        grid_y0 = grid_x0;
+    }
 
     double grid_dt = paraRdr->getVal("grid_dt");
     double grid_dx = paraRdr->getVal("grid_dx");
@@ -91,8 +149,7 @@ int SurfaceFinder::Find_full_hypersurface() {
     Cornelius* cornelius_ptr = new Cornelius();
     cornelius_ptr->init(dim, T_cut, lattice_spacing);
   
-    int ntime = static_cast<int>(
-            (hydroinfo_ptr->getHydrogridTaumax() - grid_t0)/grid_dt);
+    int ntime = static_cast<int>((grid_tauf - grid_tau0)/grid_dt);
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx);
     int ny = static_cast<int>(fabs(2.*grid_y0)/grid_dy);
 
@@ -110,7 +167,7 @@ int SurfaceFinder::Find_full_hypersurface() {
   
     for (int itime = 0; itime < ntime; itime++) {
         // loop over time evolution
-        double tau_local = grid_t0 + (itime + 0.5)*grid_dt;
+        double tau_local = grid_tau0 + (itime + 0.5)*grid_dt;
         for (int i = 0; i < nx; i++) {
             // loops over the transverse plane
             double x_local = grid_x0 + (i + 0.5)*grid_dx;
@@ -138,8 +195,14 @@ int SurfaceFinder::Find_full_hypersurface() {
                         double da_x = cornelius_ptr->get_normal_elem(isurf, 1);
                         double da_y = cornelius_ptr->get_normal_elem(isurf, 2);
                        
-                        hydroinfo_ptr->getHydroinfo(tau_center, x_center,
-                                                    y_center, fluidCellptr);
+                        if (hydro_type == 1) {
+                            hydroinfo_ptr->getHydroinfo(
+                                tau_center, x_center, y_center, fluidCellptr);
+                        } else {
+                            hydroinfo_MUSIC_ptr->getHydroValues(
+                                x_center, y_center, 0.0, tau_center,
+                                fluidCellptr);
+                        }
 
                         output << scientific << setw(18) << setprecision(8) 
                                << tau_center << "   " << x_center << "   "

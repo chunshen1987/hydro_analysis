@@ -27,12 +27,12 @@ MAIN		=	hydro_analysis.e
 endif
 
 SRC		=	main.cpp Hydroinfo_h5.cpp FluidcellStatistic.cpp \
-                  ParameterReader.cpp arsenal.cpp SurfaceFinder.cpp \
-                  cornelius.cpp
+            ParameterReader.cpp arsenal.cpp SurfaceFinder.cpp \
+            cornelius.cpp Hydroinfo_MUSIC.cpp
 
 INC		= 	Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h \
-                  ParameterReader.h arsenal.h SurfaceFinder.h cornelius.h
-
+            ParameterReader.h arsenal.h SurfaceFinder.h cornelius.h \
+			Hydroinfo_MUSIC.h
 
 # -------------------------------------------------
 
@@ -78,10 +78,11 @@ install:	$(TARGET)
 		cp $(TARGET) $(INSTPATH)
 
 # --------------- Dependencies -------------------
-main.cpp : Hydroinfo_h5.h Stopwatch.h FluidcellStatistic.h ParameterReader.h
+main.cpp : Hydroinfo_h5.h Hydroinfo_MUSIC.h Stopwatch.h FluidcellStatistic.h ParameterReader.h
 Hydroinfo_h5.cpp : Hydroinfo_h5.h
-FluidcellStatistic.cpp : FluidcellStatistic.h
+Hydroinfo_MUSIC.cpp : Hydroinfo_MUSIC.h
+FluidcellStatistic.cpp : FluidcellStatistic.h Hydroinfo_h5.h Hydroinfo_MUSIC.h
 ParameterReader.cpp : ParameterReader.h arsenal.h
 arsenal.cpp : arsenal.h
-SurfaceFinder.cpp : Hydroinfo_h5.h ParameterReader.h SurfaceFinder.h cornelius.h
+SurfaceFinder.cpp : Hydroinfo_h5.h Hydroinfo_MUSIC.h ParameterReader.h SurfaceFinder.h cornelius.h
 cornelius.cpp : cornelius.h
