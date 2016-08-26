@@ -31,6 +31,8 @@ FluidcellStatistic::FluidcellStatistic(void* hydroinfo_ptr_in,
 FluidcellStatistic::~FluidcellStatistic() {}
 
 void FluidcellStatistic::checkFreezeoutSurface(double Tdec) {
+    cout << "check the position of the freeze-out surface "
+         << "at (T = " << Tdec << " GeV) ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
     if (hydro_type == 0) {
@@ -80,6 +82,7 @@ void FluidcellStatistic::checkFreezeoutSurface(double Tdec) {
 }
 
 void FluidcellStatistic::output_temperature_vs_tau() {
+    cout << "output temperature vs tau ..." << endl;
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
     if (hydro_type == 0) {
@@ -148,6 +151,7 @@ void FluidcellStatistic::output_temperature_vs_tau() {
 }
 
 void FluidcellStatistic::output_flowvelocity_vs_tau() {
+    cout << "output u^tau vs tau ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
     if (hydro_type == 0) {
@@ -224,6 +228,7 @@ void FluidcellStatistic::output_flowvelocity_vs_tau() {
 }
 
 void FluidcellStatistic::output_temperature_vs_avg_utau() {
+    cout << "output utau vs T ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
     if (hydro_type == 0) {
@@ -324,6 +329,7 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
 }
 
 void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
+    cout << "output momentum anisotropy vs tau ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
     if (hydro_type == 0) {
@@ -396,6 +402,8 @@ void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
 }
 
 void FluidcellStatistic::outputTempasTauvsX() {
+    cout << "output 2D contour plot for temperature as function of "
+         << "tau and x ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0;
     if (hydro_type == 0) {
@@ -447,6 +455,7 @@ void FluidcellStatistic::outputTempasTauvsX() {
 
 
 void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
+    cout << "output Knudersen Number as a function of tau and x ..." << endl;
     double grid_tau0, grid_tauf;
     double grid_x0;
     if (hydro_type == 0) {
@@ -461,7 +470,7 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
     }
     
     int ntime = static_cast<int>((grid_tauf - grid_tau0)/grid_dt) + 1;
-    int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
+    int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx);
    
     double eps = 1e-15;
 
@@ -583,6 +592,8 @@ double FluidcellStatistic::compute_local_expansion_rate(
 }
 
 void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
+    cout << "output inverse Reynolds number as a function of "
+         << "tau and x ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0;
     if (hydro_type == 0) {
@@ -635,7 +646,8 @@ void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
             double inverseReynold;
 
             if (pi2 >= 0)
-                inverseReynold = sqrt(pi2)/fluidCellptr->pressure;
+                inverseReynold = sqrt(pi2)/(fluidCellptr->ed 
+                                            + fluidCellptr->pressure + 1e-15);
             else
                 inverseReynold = MAX;
 
@@ -649,6 +661,8 @@ void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
 }
 
 void FluidcellStatistic::outputBulkinverseReynoldsNumberasTauvsX() {
+    cout << "output bulk inverse Reynolds number as a function of "
+         << "tau and x ... " << endl;
     double grid_tau0, grid_tauf;
     double grid_x0;
     if (hydro_type == 0) {
@@ -719,6 +733,7 @@ double FluidcellStatistic::calculate_spacetime_4volume(double T_cut) {
     // the output volume V_4 is in [fm^4]
     // deta = 1
    
+    cout << "compute 4-volume inside T = " << T_cut << " GeV ..." << endl;
     // first get hydro grid information
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
@@ -775,6 +790,7 @@ double FluidcellStatistic::calculate_average_tau(double T_cut) {
     // inside a give temperature T_cut [GeV]
     // the output <tau> is in [fm]
    
+    cout << "compute <tau> ... " << endl;
     // first get hydro grid information
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
@@ -834,6 +850,7 @@ double FluidcellStatistic::calculate_average_temperature4(double T_cut) {
     // inside a give temperature T_cut [GeV]
     // the output <T^4> is in [GeV^4]
    
+    cout << "compute <T^4> ..." << endl;
     // first get hydro grid information
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
@@ -895,7 +912,8 @@ double FluidcellStatistic::
     //          = 11663.923 T^9.024   for T < Tsw
     // inside a give temperature T_cut [GeV]
     // the output <Gamma(T)> is in [1/fm^4]
-   
+  
+    cout << "compute <Gamma(T)> ..." << endl;
     // first get hydro grid information
     double grid_tau0, grid_tauf;
     double grid_x0, grid_y0;
@@ -962,6 +980,7 @@ double FluidcellStatistic::calculate_hypersurface_3volume(double T_cut) {
     // the output volume V_3 = int u^\mu d^3\sigma_\mu is in [fm^3]
     // deta = 1
    
+    cout << "compute 3-volume at T = " << T_cut << " GeV ... " << endl;
     // first find the hyper-surface
     void* hydro_ptr;
     if (hydro_type == 1) {

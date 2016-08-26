@@ -70,6 +70,9 @@ int main(int argc, char *argv[]) {
 
     FluidcellStatistic fluidcellanalysis(hydroinfo_ptr_in, paraRdr);
     double T_cut = paraRdr->getVal("T_cut");
+    fluidcellanalysis.outputTempasTauvsX();
+    fluidcellanalysis.outputKnudersonNumberasTauvsX();
+    fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
     fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
     fluidcellanalysis.output_temperature_vs_avg_utau();
     fluidcellanalysis.output_flowvelocity_vs_tau();
