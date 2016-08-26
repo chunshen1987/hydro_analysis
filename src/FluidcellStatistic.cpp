@@ -292,7 +292,7 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
                     double theta_local = compute_local_expansion_rate(
                                                 tau_local, x_local, y_local);
                     int T_idx = static_cast<int>((temp_local - T_dec)/dT);
-                    if (T_idx > 0 && T_idx < n_bin-1) {
+                    if (T_idx >= 0 && T_idx < n_bin-1) {
                         T_bin_avg[T_idx] += temp_local*volume_element;
                         avg_utau[T_idx] += utau_local*volume_element;
                         avg_theta[T_idx] += theta_local*volume_element;
