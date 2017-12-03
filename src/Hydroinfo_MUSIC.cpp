@@ -397,11 +397,11 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
         int ik = 0;
         fluidCell_2D newCell;
-        double T, QGPfrac, ux, uy, ueta;
-        double vx, vy, vz;
-        double pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
-        double bulkPi, e_plus_P, cs2;
-        int size = sizeof(double);
+        float T, QGPfrac, vx, vy, vz;
+        double ux, uy, ueta;
+        float pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
+        float bulkPi, e_plus_P, cs2;
+        int size = sizeof(float);
         while (true) {
             int status = 0;
             status = std::fread(&T, size, 1, fin);

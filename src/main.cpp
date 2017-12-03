@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     fluidcellanalysis.outputTempasTauvsX();
     fluidcellanalysis.outputKnudersonNumberasTauvsX();
     fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
-    fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
+    //fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
     fluidcellanalysis.output_temperature_vs_avg_utau();
     fluidcellanalysis.output_flowvelocity_vs_tau();
 
