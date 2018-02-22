@@ -121,11 +121,18 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         cout << "Using 3+1D Jeon Schenke hydro reading data ..." << endl;
         boost_invariant = false;
 
-        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001);
+        hydroDtau = hydroDtau*nskip_tau;
+        hydroDx = 2.*hydroXmax/(ixmax - 1.)*nskip_x;
+        hydroDeta = 2.*hydro_eta_max/(static_cast<double>(ietamax))*nskip_eta;
+
+        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001) + 1;
         ietamax = static_cast<int>(2.*hydro_eta_max/hydroDeta + 0.001);
         
         int n_eta = ietamax;
         int num_fluid_cell_trans = ixmax*ixmax;
+
+        cout << "neta = " << n_eta
+             << ", num_trans = " << ixmax << endl;
 
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
@@ -211,11 +218,13 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             
             int itau_idx = static_cast<int>(ik/(num_fluid_cell_trans*n_eta));
             ik++;
-            if (itau_idx%nskip_tau != 0)  // skip in tau
-                continue;
-            
+
+            int ieta = (static_cast<int>(ik/(num_fluid_cell_trans))
+                        - n_eta*itau_idx);
+            double eta = static_cast<double>(ieta)*hydroDeta - hydro_eta_max;
+
             // print out tau information
-            double tau_local = hydroTau0 + itau_idx*hydroDtau/nskip_tau;
+            double tau_local = hydroTau0 + itau_idx*hydroDtau;
             if ((ik-1)%(num_fluid_cell_trans*n_eta) == 0) {
                 cout << "read in tau frame: " << itau_idx
                      << " tau_local = " << setprecision(3) << tau_local
@@ -224,19 +233,22 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
             double v2 = vx*vx + vy*vy + vz*vz;
             if (v2 > 1.0) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData:] Error: "
-                     << "v > 1! vx = " << vx << ", vy = " << vy
-                     << ", vz = " << vz << ", T = " << T << endl;
                 if (T > 0.01) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData:] Warning: "
+                         << "v > 1! vx = " << vx << ", vy = " << vy
+                         << ", vz = " << vz << ", T = " << T << endl;
                     exit(1);
-                } else {
-                    v2 = 0.0;
                 }
+                ux = 0.0;
+                uy = 0.0;
+                ueta = 0.0;
+            } else {
+                double gamma = 1./sqrt(1. - v2);
+                ux = gamma*vx;
+                uy = gamma*vy;
+                double uz = gamma*vz;
+                ueta = -sinh(eta)*gamma + cosh(eta)*uz;
             }
-            double gamma = 1./sqrt(1. - v2);
-            ux = gamma*vx;
-            uy = gamma*vy;
-            ueta = gamma*vz;  // assuming eta = 0
 
             newCell.temperature = T;
             // convert vx and vy to longitudinal co-moving frame
@@ -266,7 +278,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::fclose(fin1);
         std::fclose(fin2);
         cout << endl;
-        cout << "number of fluid cells: " << lattice_2D->size() << endl;
+        cout << "number of fluid cells: " << lattice_3D->size() << endl;
     } else if (whichHydro == 8) {
         // event-by-event (2+1)-d MUSIC hydro from JF
         // there are two slices in medium in eta_s
