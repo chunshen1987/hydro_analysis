@@ -6,18 +6,13 @@
 #include<string>
 
 #include "hdf5.h"
+#include "data_struct.h"
 
 using namespace std;
 
-struct fluidCell {
-   double ed, sd, temperature, pressure;
-   double vx, vy, vz;
-   double pi[4][4];
-   double bulkPi;
-};
 
-class HydroinfoH5
-{
+
+class HydroinfoH5 {
    private:
       int readinFlag;
       int outputFlag;
@@ -49,7 +44,7 @@ class HydroinfoH5
       HydroinfoH5(int XL_in, int XH_in, double DX_in, int LSX_in, int YL_in, int YH_in, double DY_in, int LSY_in, double Tau0_in, double dTau_in, double LST_in, int Visflag_in, string filename_in);
 
       ~HydroinfoH5();
-     
+
       // functions to write into hdf5 file
       void setHydroFiles(int XL_in, int XH_in, double DX_in, int LSX_in, int YL_in, int YH_in, double DY_in, int LSY_in, double Tau0_in, double dTau_in, double LST_in, int Visflag_in, string filename_in);
       void writeGroupattribute(hid_t H5groupEventid);

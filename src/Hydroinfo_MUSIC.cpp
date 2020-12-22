@@ -20,12 +20,14 @@
 
 using namespace std;
 
+
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
     hbarC = 0.19733;
     lattice_2D = new vector<fluidCell_2D>;
     lattice_3D = new vector<fluidCell_3D>;
     lattice_3D_new = new vector<fluidCell_3D_new>;
 }
+
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
     if (boost_invariant) {
@@ -38,6 +40,7 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
     delete lattice_3D;
     delete lattice_3D_new;
 }
+
 
 void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     // all hydro data is stored in tau steps (not t)
@@ -127,7 +130,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
         ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001) + 1;
         ietamax = static_cast<int>(2.*hydro_eta_max/hydroDeta + 0.001);
-        
+
         int n_eta = ietamax;
         int num_fluid_cell_trans = ixmax*ixmax;
 
@@ -180,11 +183,11 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status += std::fread(&vx, size, 1, fin);
             status += std::fread(&vy, size, 1, fin);
             status += std::fread(&vz, size, 1, fin);
-            
+
             if (status != 5) {  // this is the end of file
                 break;
             }
-            
+
             int status_pi = 0;
             status_pi = std::fread(&pi00, size, 1, fin1);
             status_pi += std::fread(&pi01, size, 1, fin1);
@@ -196,26 +199,26 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi22, size, 1, fin1);
             status_pi += std::fread(&pi23, size, 1, fin1);
             status_pi += std::fread(&pi33, size, 1, fin1);
-            
+
             if (status_pi != 10) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "Wmunu file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
             }
-            
+
             int status_bulkPi = 0;
             status_bulkPi = std::fread(&bulkPi, size, 1, fin2);
             status_bulkPi += std::fread(&e_plus_P, size, 1, fin2);
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
-            
+
             if (status_bulkPi != 3) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "bulkPi file does not have the same number of "
                      << "fluid cells as the ideal file!" << endl;
                 exit(1);
             }
-            
+
             int itau_idx = static_cast<int>(ik/(num_fluid_cell_trans*n_eta));
             ik++;
 
@@ -363,7 +366,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi22, size, 1, fin1);
             status_pi += std::fread(&pi23, size, 1, fin1);
             status_pi += std::fread(&pi33, size, 1, fin1);
-            
+
             if (status_pi != 10) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "Wmunu file does not have the same number of "
@@ -375,7 +378,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_bulkPi = std::fread(&bulkPi, size, 1, fin2);
             status_bulkPi += std::fread(&e_plus_P, size, 1, fin2);
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
-            
+
             if (status_bulkPi != 3) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "bulkPi file does not have the same number of "
@@ -527,7 +530,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             ux = vx*gamma;
             uy = vy*gamma;
             ueta = vz*gamma;  // assuming at the eta = 0
-            
+
             int status_pi = 0;
             status_pi = std::fread(&pi00, size, 1, fin1);
             status_pi += std::fread(&pi01, size, 1, fin1);
@@ -539,7 +542,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_pi += std::fread(&pi22, size, 1, fin1);
             status_pi += std::fread(&pi23, size, 1, fin1);
             status_pi += std::fread(&pi33, size, 1, fin1);
-            
+
             if (status_pi != 10) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "Wmunu file does not have the same number of "
@@ -551,7 +554,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status_bulkPi = std::fread(&bulkPi, size, 1, fin2);
             status_bulkPi += std::fread(&e_plus_P, size, 1, fin2);
             status_bulkPi += std::fread(&cs2, size, 1, fin2);
-            
+
             if (status_bulkPi != 3) {
                 cout << "Error:Hydroinfo_MUSIC::readHydroData: "
                      << "bulkPi file does not have the same number of "
@@ -622,7 +625,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                  << "Unable to open file: " << evolution_name << endl;
             exit(1);
         }
-        
+
         int idx[4];
         int itau_max = 0;
         double ideal_variables[4];
@@ -632,7 +635,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             int status = 0;
             status = std::fread(&idx, sizeof(int), 4, fin);
             if (status == 0) break;
-            
+
             status = std::fread(&ideal_variables, sizeof(double), 4, fin);
             if (status == 0) {
                 cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
@@ -649,7 +652,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                     exit(1);
                 }
             }
-            
+
             double Wmunu[5] = {0., 0., 0., 0., 0.};
             if (turn_on_shear == 1) {
                 status = std::fread(&Wmunu, sizeof(double), 5, fin);
@@ -665,7 +668,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             double pi13 = Wmunu[2];
             double pi22 = Wmunu[3];
             double pi23 = Wmunu[4];
-           
+
             double bulkPi;
             if (turn_on_bulk == 1) {
                 status = std::fread(&bulkPi, sizeof(double), 1, fin);
@@ -741,6 +744,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     cout << "hydro_deta = " << hydroDeta << " fm" << endl;
 }
 
+
 void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id,
                                              fluidCell_3D_new *info) {
     info->itau = (*lattice_3D_new)[cell_id].itau;
@@ -758,6 +762,7 @@ void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id,
     info->pi23 = (*lattice_3D_new)[cell_id].pi23;
     info->bulkPi = (*lattice_3D_new)[cell_id].bulkPi;
 }
+
 
 void Hydroinfo_MUSIC::getHydroValues(double x, double y,
                                      double z, double t, fluidCell* info) {
@@ -851,37 +856,37 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         return;
     }
 
-  // The array of positions on the 4-dimensional rectangle:
-  int position[2][2][2][2];
-  for (int ipx = 0; ipx < 2; ipx++) {
-        int px;
-        if (ipx == 0 || ix == ixmax-1)
-            px = ix;
-        else
-            px = ix + 1;
-        for (int ipy = 0; ipy < 2; ipy++) {
-            int py;
-            if (ipy == 0 || iy == ixmax-1)
-                py = iy;
-            else
-                py = iy + 1;
-            for (int ipeta = 0; ipeta < 2; ipeta++) {
-                int peta;
-                if (ipeta == 0 || ieta == ietamax-1)
-                    peta = ieta;
-                else
-                    peta = ieta + 1;
-                for (int iptau = 0; iptau < 2; iptau++) {
-                    int ptau;
-                    if (iptau == 0 || itau == itaumax-1)
-                        ptau = itau;
-                    else
-                        ptau = itau + 1;
-                    position[ipx][ipy][ipeta][iptau] = (
-                                px + ixmax*(py + ixmax*(peta + ietamax*ptau)));
-                }
-            }
-        }
+    // The array of positions on the 4-dimensional rectangle:
+    int position[2][2][2][2];
+    for (int ipx = 0; ipx < 2; ipx++) {
+          int px;
+          if (ipx == 0 || ix == ixmax-1)
+              px = ix;
+          else
+              px = ix + 1;
+          for (int ipy = 0; ipy < 2; ipy++) {
+              int py;
+              if (ipy == 0 || iy == ixmax-1)
+                  py = iy;
+              else
+                  py = iy + 1;
+              for (int ipeta = 0; ipeta < 2; ipeta++) {
+                  int peta;
+                  if (ipeta == 0 || ieta == ietamax-1)
+                      peta = ieta;
+                  else
+                      peta = ieta + 1;
+                  for (int iptau = 0; iptau < 2; iptau++) {
+                      int ptau;
+                      if (iptau == 0 || itau == itaumax-1)
+                          ptau = itau;
+                      else
+                          ptau = itau + 1;
+                      position[ipx][ipy][ipeta][iptau] = (
+                                  px + ixmax*(py + ixmax*(peta + ietamax*ptau)));
+                  }
+              }
+          }
     }
 
     // And now, the interpolation:
@@ -1044,6 +1049,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     return;
 }
 
+
 void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
     fluidCell *hydroInfo = new fluidCell;
     for (int i = 0; i < itaumax; i++) {
@@ -1066,6 +1072,7 @@ void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
     }
     delete hydroInfo;
 }
+
 
 void Hydroinfo_MUSIC::update_grid_info(
     double tau0, double tau_max, double dtau,
