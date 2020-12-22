@@ -3,45 +3,53 @@
 
 
 struct fluidCell {
-   double ed, sd, temperature, pressure;
-   double vx, vy, vz;
-   double pi[4][4];
-   double bulkPi;
+   float ed, sd, temperature, pressure;
+   float vx, vy, vz;
+   float pi[4][4];
+   float bulkPi;
 };
 
 
 struct fluidCell_2D {
-    double temperature;
-    double ux, uy, ueta;
+    float temperature;
+    float ux, uy, ueta;
     // the shear stress tensor are already divided by e+P
-    double pi00, pi01, pi02;
-    double pi11, pi12;
-    double pi22;
-    double pi33;
-    double bulkPi;
+    float pi00, pi01, pi02;
+    float pi11, pi12;
+    float pi22;
+    float pi33;
+    float bulkPi;
+};
+
+
+struct fluidCell_3D_ideal {
+    int itau, ix, iy, ieta;
+    float energy_density;
+    float temperature;
+    float ux, uy, ueta;
 };
 
 
 struct fluidCell_3D {
-    double temperature;
-    double ux, uy, ueta;
+    float temperature;
+    float ux, uy, ueta;
     // the shear stress tensor are already divided by e+P
-    double pi00, pi01, pi02, pi03;
-    double pi11, pi12, pi13;
-    double pi22, pi23;
-    double pi33;
-    double bulkPi;
+    float pi00, pi01, pi02, pi03;
+    float pi11, pi12, pi13;
+    float pi22, pi23;
+    float pi33;
+    float bulkPi;
 };
 
 
 struct fluidCell_3D_new {
     int itau, ix, iy, ieta;
-    double temperature;
-    double ux, uy, ueta;
+    float temperature;
+    float ux, uy, ueta;
     // the shear stress tensor are already divided by e+P
-    double pi11, pi12, pi13;
-    double pi22, pi23;
-    double bulkPi;
+    float pi11, pi12, pi13;
+    float pi22, pi23;
+    float bulkPi;
 };
 
 #endif  // DATA_STRUCT_H_

@@ -15,8 +15,8 @@
 #include <vector>
 #include <string>
 
-#include "./Hydroinfo_h5.h"
-#include "./Hydroinfo_MUSIC.h"
+#include "data_struct.h"
+#include "Hydroinfo_MUSIC.h"
 
 using namespace std;
 
