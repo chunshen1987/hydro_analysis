@@ -468,10 +468,10 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
         grid_x0 = (- hydroinfo_MUSIC_ptr->get_hydro_x_max()
                    + hydroinfo_MUSIC_ptr->get_hydro_dx());
     }
-    
-    int ntime = static_cast<int>((grid_tauf - grid_tau0)/grid_dt) + 1;
-    int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx);
-   
+
+    int ntime = static_cast<int>((grid_tauf - grid_tau0)/grid_dt + 0.1) + 1;
+    int nx = static_cast<int>(std::abs(2.*grid_x0)/grid_dx + 0.1);
+
     double eps = 1e-15;
 
     fluidCell* fluidCellptr = new fluidCell;
@@ -487,7 +487,6 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
             double y_local = 0.0;
             double theta = compute_local_expansion_rate(tau_local,
                                                         x_local, y_local);
-
             if (hydro_type == 0) {
                 hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local,
                                             fluidCellptr);

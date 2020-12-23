@@ -33,7 +33,7 @@ class HydroinfoH5 {
       int grid_LSX, grid_LSY, grid_LST;
       int LST_cur;
 
-      int dimensionX, dimensionY;
+      unsigned int dimensionX, dimensionY;
       double ***ed, ***sd, ***vx, ***vy, ***Temperature, ***Pressure;
       double ***pi00, ***pi01, ***pi02, ***pi03, ***pi11, ***pi12, ***pi13, ***pi22, ***pi23, ***pi33;
       double ***BulkPi;

@@ -114,8 +114,10 @@ void HydroinfoH5::setHydroFiles(
 
     int XShift = abs(grid_XL%grid_LSX);
     int YShift = abs(grid_YL%grid_LSY);
-    dimensionX = (int) (grid_XH - grid_XL - 2*XShift)/grid_LSX + 1;
-    dimensionY = (int) (grid_YH - grid_YL - 2*YShift)/grid_LSY + 1;
+    dimensionX = static_cast<unsigned int>(
+            (grid_XH - grid_XL - 2*XShift)/grid_LSX + 1);
+    dimensionY = static_cast<unsigned int>(
+            (grid_YH - grid_YL - 2*YShift)/grid_LSY + 1);
 
     filename = filename_in;
     herr_t status;
@@ -213,10 +215,7 @@ void HydroinfoH5::writeHydroBlock(
     hid_t groupFrameid;
     const hsize_t dims[2] = {dimensionX, dimensionY};
 
-    int XShift = abs(grid_XL%grid_LSX);
-    int YShift = abs(grid_YL%grid_LSY);
-
-    int Frame_id = (int) Time_id/grid_LST;
+    int Frame_id = static_cast<int>(Time_id/grid_LST);
     ostringstream frameName;
     frameName << "Frame_" << setfill('0') << setw(4) << Frame_id;
 

@@ -18,12 +18,12 @@
 #include <iomanip>
 #include <cstdlib>
 
-#include "./Hydroinfo_h5.h"
-#include "./Hydroinfo_MUSIC.h"
-#include "./Stopwatch.h"
-#include "./FluidcellStatistic.h"
-#include "./ParameterReader.h"
-#include "./SurfaceFinder.h"
+#include "Hydroinfo_h5.h"
+#include "Hydroinfo_MUSIC.h"
+#include "Stopwatch.h"
+#include "FluidcellStatistic.h"
+#include "ParameterReader.h"
+#include "SurfaceFinder.h"
 
 using namespace std;
 
@@ -75,10 +75,10 @@ int main(int argc, char *argv[]) {
     }
 
     FluidcellStatistic fluidcellanalysis(hydroinfo_ptr_in, paraRdr);
-    double T_cut = paraRdr->getVal("T_cut");
     fluidcellanalysis.outputTempasTauvsX();
     fluidcellanalysis.outputKnudersonNumberasTauvsX();
     fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
+    //double T_cut = paraRdr->getVal("T_cut");
     //fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
     fluidcellanalysis.output_temperature_vs_avg_utau();
     fluidcellanalysis.output_flowvelocity_vs_tau();

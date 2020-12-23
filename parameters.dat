@@ -1,4 +1,4 @@
-hydro_type = 5       # type of the hydro evolution file
+hydro_type = 4       # type of the hydro evolution file
                      # 1: (2+1)D hydro VISH2+1 in hdf5 file
                      # 2: (2+1)D hydro MUSIC (JF's format)
                      # 3: (2+1)D hydro MUSIC (on regular grid CShen's format)

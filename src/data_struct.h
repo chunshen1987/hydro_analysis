@@ -1,6 +1,9 @@
 #ifndef DATA_STRUCT_H_
 #define DATA_STRUCT_H_
 
+namespace PhysConsts {
+    const double hbarC = 0.19733;
+}
 
 struct fluidCell {
    float ed, sd, temperature, pressure;
@@ -24,9 +27,9 @@ struct fluidCell_2D {
 
 struct fluidCell_3D_ideal {
     int itau, ix, iy, ieta;
-    float energy_density;
     float temperature;
-    float ux, uy, ueta;
+    float ed, pressure;
+    float ux, uy, uz;
 };
 
 
