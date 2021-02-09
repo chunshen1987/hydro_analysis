@@ -57,6 +57,12 @@ int main(int argc, char *argv[]) {
         int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         hydroinfo_ptr_in = hydroinfo_ptr;
+    } else if (hydro_type == 31) {
+        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        int hydro_mode = 11;
+        int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
+        hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
+        hydroinfo_ptr_in = hydroinfo_ptr;
     } else if (hydro_type == 4) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
         int hydro_mode = 10;

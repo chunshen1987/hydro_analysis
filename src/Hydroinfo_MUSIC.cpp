@@ -21,7 +21,9 @@
 using namespace std;
 
 
-Hydroinfo_MUSIC::Hydroinfo_MUSIC() {}
+Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
+    boost_invariant = false;
+}
 
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
@@ -595,10 +597,15 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::fclose(fin2);
         cout << endl;
         cout << "number of fluid cells: " << lattice_2D.size() << endl;
-    } else if (whichHydro == 10) {
-        // new 3+1D MUSIC hydro
-        cout << "Using 3+1D new MUSIC hydro reading data ..." << endl;
-        boost_invariant = false;
+    } else if (whichHydro == 10 || whichHydro == 11) {
+        // new MUSIC hydro format (no grid)
+        cout << "Using new MUSIC hydro format (no grid) reading data ..."
+             << endl;
+        if (whichHydro == 10) {
+            boost_invariant = false;
+        } else {
+            boost_invariant = true;
+        }
 
         // read in temperature and flow velocity
         // The name of the evolution file: evolution_name
@@ -750,22 +757,24 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         eta = z;
     }
 
-    int ieta = floor((hydro_eta_max+eta)/hydroDeta + 0.0001);
-    if (hydroWhichHydro == 8)
-        ieta = 0;
+    int itau = static_cast<int>((tau-hydroTau0)/hydroDtau + 0.0001);
+    int ix   = static_cast<int>((hydroXmax+x)/hydroDx + 0.0001);
+    int iy   = static_cast<int>((hydroXmax+y)/hydroDx + 0.0001);
+    int ieta = static_cast<int>((hydro_eta_max+eta)/hydroDeta + 0.0001);
 
-    int itau = floor((tau-hydroTau0)/hydroDtau + 0.0001);
-    int ix = floor((hydroXmax+x)/hydroDx + 0.0001);
-    int iy = floor((hydroXmax+y)/hydroDx + 0.0001);
-
-    float xfrac = (x - (static_cast<float>(ix)*hydroDx - hydroXmax))/hydroDx;
-    float yfrac = (y - (static_cast<float>(iy)*hydroDx - hydroXmax))/hydroDx;
-    float etafrac = (eta/hydroDeta - static_cast<float>(ieta)
-                      + 0.5*static_cast<float>(ietamax));
     float taufrac = (tau - hydroTau0)/hydroDtau - static_cast<float>(itau);
+    float xfrac   = (x - (static_cast<float>(ix)*hydroDx - hydroXmax))/hydroDx;
+    float yfrac   = (y - (static_cast<float>(iy)*hydroDx - hydroXmax))/hydroDx;
+    float etafrac = (eta/hydroDeta - static_cast<float>(ieta)
+                     + 0.5*static_cast<float>(ietamax));
+
+    if (boost_invariant) {
+        ieta = 0;
+        etafrac = 0.;
+    }
 
     if (ix < 0 || ix >= ixmax) {
-        cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: "
+        cout << "[Hydroinfo_MUSIC::getHydroValues]: "
              << "WARNING - x out of range x=" << x
              << ", ix=" << ix << ", ixmax=" << ixmax << endl;
         cout << "x=" << x << " y=" << y << " eta=" << eta
@@ -780,7 +789,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (iy < 0 || iy >= ixmax) {
-        cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: "
+        cout << "[Hydroinfo_MUSIC::getHydroValues]: "
              << "WARNING - y out of range, y=" << y << ", iy="  << iy
              << ", iymax=" << ixmax << endl;
         cout << "x=" << x << " y=" << y << " eta=" << eta
@@ -795,10 +804,10 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (itau < 0 || itau > itaumax) {
-        cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: WARNING - "
+        cout << "[Hydroinfo_MUSIC::getHydroValues]: WARNING - "
              << "tau out of range, itau=" << itau << ", itaumax=" << itaumax
              << endl;
-        cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: tau= " << tau
+        cout << "[Hydroinfo_MUSIC::getHydroValues]: tau= " << tau
              << ", hydroTauMax = " << hydroTauMax
              << ", hydroDtau = " << hydroDtau << endl;
 
@@ -809,7 +818,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         return;
     }
     if (ieta < 0 || ieta >= ietamax) {
-        cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: WARNING - "
+        cout << "[Hydroinfo_MUSIC::getHydroValues]: WARNING - "
              << "eta out of range, ieta=" << ieta << ", ietamax=" << ietamax
              << endl;
         info->temperature = 0.0;
@@ -903,7 +912,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
 
                 float prefrac = yfactor*etafactor*taufactor;
 
-                if (boost_invariant) {
+                if (hydroWhichHydro == 8 || hydroWhichHydro == 9) {
                     HydroCell_2D_ptr1 = (
                             &lattice_2D[position[0][ipy][ipeta][iptau]]);
                     HydroCell_2D_ptr2 = (
@@ -937,90 +946,84 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
                             prefrac*((1. - xfrac)*HydroCell_2D_ptr1->bulkPi
                             + xfrac*HydroCell_2D_ptr2->bulkPi));
                     }
-                } else {
-                    if (hydroWhichHydro < 10) {
-                        HydroCell_3D_ptr1 = (
-                                &lattice_3D[position[0][ipy][ipeta][iptau]]);
-                        HydroCell_3D_ptr2 = (
-                                &lattice_3D[position[1][ipy][ipeta][iptau]]);
-                        T += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->temperature
-                                      + xfrac*HydroCell_3D_ptr2->temperature);
-                        ux += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->ux
-                                        + xfrac*HydroCell_3D_ptr2->ux);
-                        uy += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->uy
-                                        + xfrac*HydroCell_3D_ptr2->uy);
-                        ueta += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->ueta
-                                        + xfrac*HydroCell_3D_ptr2->ueta);
-                        if (turn_on_shear == 1) {
-                            pi00 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi00
-                                            + xfrac*HydroCell_3D_ptr2->pi00);
-                            pi01 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi01
-                                            + xfrac*HydroCell_3D_ptr2->pi01);
-                            pi02 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi02
-                                            + xfrac*HydroCell_3D_ptr2->pi02);
-                            pi03 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi03
-                                            + xfrac*HydroCell_3D_ptr2->pi03);
-                            pi11 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi11
-                                            + xfrac*HydroCell_3D_ptr2->pi11);
-                            pi12 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi12
-                                            + xfrac*HydroCell_3D_ptr2->pi12);
-                            pi13 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi13
-                                            + xfrac*HydroCell_3D_ptr2->pi13);
-                            pi22 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi22
-                                            + xfrac*HydroCell_3D_ptr2->pi22);
-                            pi23 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi23
-                                            + xfrac*HydroCell_3D_ptr2->pi23);
-                            pi33 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi33
-                                            + xfrac*HydroCell_3D_ptr2->pi33);
-                        }
-                        if (turn_on_bulk == 1) {
-                            bulkPi += (
-                                prefrac*((1. - xfrac)*HydroCell_3D_ptr1->bulkPi
-                                + xfrac*HydroCell_3D_ptr2->bulkPi));
-                        }
-                    } else {
-                        HydroCell_3D_ideal_ptr1 = (
-                            &lattice_3D_ideal[idx_map_[position[0][ipy][ipeta][iptau]]]);
-                        HydroCell_3D_ideal_ptr2 = (
-                            &lattice_3D_ideal[idx_map_[position[1][ipy][ipeta][iptau]]]);
-                        T += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->temperature
-                                      + xfrac*HydroCell_3D_ideal_ptr2->temperature);
-                        ed += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->ed
-                                      + xfrac*HydroCell_3D_ideal_ptr2->ed);
-                        p += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->pressure
-                                      + xfrac*HydroCell_3D_ideal_ptr2->pressure);
-                        ux += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->ux
-                                        + xfrac*HydroCell_3D_ideal_ptr2->ux);
-                        uy += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->uy
-                                        + xfrac*HydroCell_3D_ideal_ptr2->uy);
-                        uz += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->uz
-                                       + xfrac*HydroCell_3D_ideal_ptr2->uz);
+                } else if (hydroWhichHydro == 6) {
+                    HydroCell_3D_ptr1 = (
+                            &lattice_3D[position[0][ipy][ipeta][iptau]]);
+                    HydroCell_3D_ptr2 = (
+                            &lattice_3D[position[1][ipy][ipeta][iptau]]);
+                    T += prefrac*(
+                            (1. - xfrac)*HydroCell_3D_ptr1->temperature
+                            + xfrac*HydroCell_3D_ptr2->temperature);
+                    ux += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->ux
+                                   + xfrac*HydroCell_3D_ptr2->ux);
+                    uy += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->uy
+                                   + xfrac*HydroCell_3D_ptr2->uy);
+                    ueta += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->ueta
+                                     + xfrac*HydroCell_3D_ptr2->ueta);
+                    if (turn_on_shear == 1) {
+                        pi00 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi00
+                                         + xfrac*HydroCell_3D_ptr2->pi00);
+                        pi01 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi01
+                                         + xfrac*HydroCell_3D_ptr2->pi01);
+                        pi02 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi02
+                                         + xfrac*HydroCell_3D_ptr2->pi02);
+                        pi03 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi03
+                                         + xfrac*HydroCell_3D_ptr2->pi03);
+                        pi11 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi11
+                                         + xfrac*HydroCell_3D_ptr2->pi11);
+                        pi12 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi12
+                                         + xfrac*HydroCell_3D_ptr2->pi12);
+                        pi13 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi13
+                                         + xfrac*HydroCell_3D_ptr2->pi13);
+                        pi22 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi22
+                                         + xfrac*HydroCell_3D_ptr2->pi22);
+                        pi23 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi23
+                                         + xfrac*HydroCell_3D_ptr2->pi23);
+                        pi33 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi33
+                                         + xfrac*HydroCell_3D_ptr2->pi33);
                     }
+                    if (turn_on_bulk == 1) {
+                        bulkPi += (
+                            prefrac*((1. - xfrac)*HydroCell_3D_ptr1->bulkPi
+                            + xfrac*HydroCell_3D_ptr2->bulkPi));
+                    }
+                } else if (hydroWhichHydro == 10 || hydroWhichHydro == 11) {
+                    HydroCell_3D_ideal_ptr1 = (
+                        &lattice_3D_ideal[idx_map_[position[0][ipy][ipeta][iptau]]]);
+                    HydroCell_3D_ideal_ptr2 = (
+                        &lattice_3D_ideal[idx_map_[position[1][ipy][ipeta][iptau]]]);
+                    T += prefrac*(
+                        (1. - xfrac)*HydroCell_3D_ideal_ptr1->temperature
+                        + xfrac*HydroCell_3D_ideal_ptr2->temperature);
+                    ed += prefrac*(
+                        (1. - xfrac)*HydroCell_3D_ideal_ptr1->ed
+                        + xfrac*HydroCell_3D_ideal_ptr2->ed);
+                    p += prefrac*(
+                        (1. - xfrac)*HydroCell_3D_ideal_ptr1->pressure
+                        + xfrac*HydroCell_3D_ideal_ptr2->pressure);
+                    ux += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->ux
+                                    + xfrac*HydroCell_3D_ideal_ptr2->ux);
+                    uy += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->uy
+                                    + xfrac*HydroCell_3D_ideal_ptr2->uy);
+                    uz += prefrac*((1. - xfrac)*HydroCell_3D_ideal_ptr1->uz
+                                   + xfrac*HydroCell_3D_ideal_ptr2->uz);
                 }
             }
         }
     }
 
-    if (hydroWhichHydro < 10) {
-        float eta_local = 0.5*log((t + z)/(t - z));
-        float sinh_eta, cosh_eta;
-        if (fabs(eta_local) < 1e-6) {
-            // use Taylor expansion for small eta_s to speed up
-            // avoiding to evaluate sinh and cosh
-            sinh_eta = eta_local;
-            cosh_eta = 1.0 + 0.5*eta_local*eta_local;
-        } else {
-            sinh_eta = sinh(eta_local);
-            cosh_eta = cosh(eta_local);
-        }
-        float utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
-        float uz = utau*sinh_eta + ueta*cosh_eta;
-        float ut = utau*cosh_eta + ueta*sinh_eta;
+    if (hydroWhichHydro == 10) {
+        float ut = sqrt(1. + ux*ux + uy*uy + uz*uz);
         vx = ux/ut;
         vy = uy/ut;
         vz = uz/ut;
     } else {
-        float ut = sqrt(1. + ux*ux + uy*uy + uz*uz);
+        float eta_local = 0.5*log((t + z)/(t - z));
+        float sinh_eta = sinh(eta_local);
+        float cosh_eta = cosh(eta_local);
+        float utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
+        float uz = utau*sinh_eta + ueta*cosh_eta;
+        float ut = utau*cosh_eta + ueta*sinh_eta;
         vx = ux/ut;
         vy = uy/ut;
         vz = uz/ut;
