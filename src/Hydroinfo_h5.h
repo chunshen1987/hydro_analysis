@@ -8,9 +8,7 @@
 #include "hdf5.h"
 #include "data_struct.h"
 
-using namespace std;
-
-
+using std::string;
 
 class HydroinfoH5 {
    private:

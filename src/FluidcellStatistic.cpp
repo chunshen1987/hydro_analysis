@@ -7,10 +7,11 @@
 #include <string>
 #include <cstdlib>
 
-#include "./FluidcellStatistic.h"
-#include "./SurfaceFinder.h"
+#include "FluidcellStatistic.h"
+#include "SurfaceFinder.h"
 
-using namespace std;
+using std::cout;
+using std::endl;
 
 FluidcellStatistic::FluidcellStatistic(void* hydroinfo_ptr_in,
                                        ParameterReader* paraRdr_in) {
@@ -29,6 +30,7 @@ FluidcellStatistic::FluidcellStatistic(void* hydroinfo_ptr_in,
 }
 
 FluidcellStatistic::~FluidcellStatistic() {}
+
 
 void FluidcellStatistic::checkFreezeoutSurface(double Tdec) {
     cout << "check the position of the freeze-out surface "
@@ -54,7 +56,7 @@ void FluidcellStatistic::checkFreezeoutSurface(double Tdec) {
 
     double tau_local;
     fluidCell* fluidCellptr = new fluidCell();
-    ofstream output;
+    std::ofstream output;
     output.open("results/checkFreezeoutSurface.dat", std::ofstream::app);
 
     for (int itime = 0; itime < ntime; itime++) {
@@ -81,6 +83,7 @@ void FluidcellStatistic::checkFreezeoutSurface(double Tdec) {
     return;
 }
 
+
 void FluidcellStatistic::output_temperature_vs_tau() {
     cout << "output temperature vs tau ..." << endl;
     double grid_tau0, grid_tauf;
@@ -97,12 +100,12 @@ void FluidcellStatistic::output_temperature_vs_tau() {
                    + hydroinfo_MUSIC_ptr->get_hydro_dx());
         grid_y0 = grid_x0;
     }
-    
+
     int nt = static_cast<int>((grid_tauf - grid_tau0)/grid_dt + 1);
     int nx = static_cast<int>(abs(2*grid_x0)/grid_dx) + 1;
     int ny = static_cast<int>(abs(2*grid_y0)/grid_dy) + 1;
 
-    ofstream output;
+    std::ofstream output;
     output.open("results/tau_vs_T.dat");
 
     fluidCell* fluidCellptr = new fluidCell;
@@ -150,6 +153,7 @@ void FluidcellStatistic::output_temperature_vs_tau() {
     return;
 }
 
+
 void FluidcellStatistic::output_flowvelocity_vs_tau() {
     cout << "output u^tau vs tau ... " << endl;
     double grid_tau0, grid_tauf;
@@ -173,7 +177,7 @@ void FluidcellStatistic::output_flowvelocity_vs_tau() {
 
     fluidCell* fluidCellptr = new fluidCell;
 
-    ofstream output;
+    std::ofstream output;
     output.open("results/tau_vs_v.dat", std::ofstream::app);
     output << "# tau (fm)  V4 (fm^4)  <u^tau>  theta" << endl;
 
@@ -227,6 +231,7 @@ void FluidcellStatistic::output_flowvelocity_vs_tau() {
     return;
 }
 
+
 void FluidcellStatistic::output_temperature_vs_avg_utau() {
     cout << "output utau vs T ... " << endl;
     double grid_tau0, grid_tauf;
@@ -248,7 +253,7 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
     int nx = static_cast<int>(abs(2*grid_x0)/grid_dx) + 1;
     int ny = static_cast<int>(abs(2*grid_y0)/grid_dy) + 1;
 
-    ofstream output("results/T_vs_v.dat");
+    std::ofstream output("results/T_vs_v.dat");
     output << "# T (GeV)  V (fm^4)  <u^tau>  theta" << endl;
 
     int n_bin = 41;
@@ -324,9 +329,10 @@ void FluidcellStatistic::output_temperature_vs_avg_utau() {
     delete[] avg_utau;
     delete[] avg_theta;
     delete fluidCellptr;
-    
+
     return;
 }
+
 
 void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
     cout << "output momentum anisotropy vs tau ... " << endl;
@@ -344,13 +350,13 @@ void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
                    + hydroinfo_MUSIC_ptr->get_hydro_dx());
         grid_y0 = grid_x0;
     }
-    
+
     int nt = static_cast<int>((grid_tauf - grid_tau0)/grid_dt + 1);
     int nx = static_cast<int>(abs(2*grid_x0)/grid_dx) + 1;
     int ny = static_cast<int>(abs(2*grid_y0)/grid_dy) + 1;
 
     fluidCell* fluidCellptr = new fluidCell;
-    ofstream output;
+    std::ofstream output;
     output.open("results/tau_vs_epsP.dat");
 
     for (int it = 0; it < nt; it++) {
@@ -401,6 +407,7 @@ void FluidcellStatistic::output_momentum_anisotropy_vs_tau() {
     return;
 }
 
+
 void FluidcellStatistic::outputTempasTauvsX() {
     cout << "output 2D contour plot for temperature as function of "
          << "tau and x ... " << endl;
@@ -422,7 +429,7 @@ void FluidcellStatistic::outputTempasTauvsX() {
 
     double tau_local;
     fluidCell* fluidCellptr = new fluidCell();
-    ofstream output;
+    std::ofstream output;
     output.open("results/TempasTauvsX.dat");
 
     for (int itime = 0; itime < ntime; itime++) {
@@ -475,7 +482,7 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
     double eps = 1e-15;
 
     fluidCell* fluidCellptr = new fluidCell;
-    ofstream output;
+    std::ofstream output;
     output.open("results/KnudsenNumberasTauvsX.dat");
 
     for (int itime = 1; itime < ntime; itime++) {
@@ -509,6 +516,7 @@ void FluidcellStatistic::outputKnudersonNumberasTauvsX() {
     delete fluidCellptr;
     return;
 }
+
 
 double FluidcellStatistic::compute_local_expansion_rate(
                         double tau_local, double x_local, double y_local) {
@@ -612,7 +620,7 @@ void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
     double MAX = 1000.;
 
     fluidCell* fluidCellptr = new fluidCell();
-    ofstream output;
+    std::ofstream output;
     output.open("results/inverseReynoldsNumberasTauvsX.dat");
 
     for (int itime = 0; itime < ntime; itime++) {
@@ -641,7 +649,7 @@ void FluidcellStatistic::outputinverseReynoldsNumberasTauvsX() {
                     + 2.*(fluidCellptr->pi[1][2]*fluidCellptr->pi[1][2]
                           + fluidCellptr->pi[1][3]*fluidCellptr->pi[1][3]
                           + fluidCellptr->pi[2][3]*fluidCellptr->pi[2][3]));
-       
+
             double inverseReynold;
 
             if (pi2 >= 0)
@@ -674,12 +682,12 @@ void FluidcellStatistic::outputBulkinverseReynoldsNumberasTauvsX() {
         grid_x0 = (- hydroinfo_MUSIC_ptr->get_hydro_x_max()
                    + hydroinfo_MUSIC_ptr->get_hydro_dx());
     }
-    
+
     int ntime = static_cast<int>((grid_tauf - grid_tau0)/grid_dt) + 1;
     int nx = static_cast<int>(fabs(2.*grid_x0)/grid_dx) + 1;
 
     fluidCell* fluidCellptr = new fluidCell();
-    ofstream output;
+    std::ofstream output;
     output.open("results/inverseReynoldsNumberasTauvsX.dat");
 
     for (int itime = 0 ; itime < ntime; itime++) {
@@ -718,7 +726,7 @@ void FluidcellStatistic::analysis_hydro_volume_for_photon(double T_cut) {
         calculate_average_integrated_photonRate_parameterization(T_cut);
     stringstream output;
     output << "results/volume_info_for_photon_Tcut_" << T_cut << ".dat";
-    ofstream of(output.str().c_str());
+    std::ofstream of(output.str().c_str());
     of << "# V_4  <tau>  V_3  <T_4>  <GammaT> " << endl;
     of << scientific << setw(18) << setprecision(8)
        << V_4 << "  " << average_tau << "  "
@@ -911,7 +919,7 @@ double FluidcellStatistic::
     //          = 11663.923 T^9.024   for T < Tsw
     // inside a give temperature T_cut [GeV]
     // the output <Gamma(T)> is in [1/fm^4]
-  
+
     cout << "compute <Gamma(T)> ..." << endl;
     // first get hydro grid information
     double grid_tau0, grid_tauf;
@@ -973,12 +981,13 @@ double FluidcellStatistic::
     return(average_GammaT);
 }
 
+
 double FluidcellStatistic::calculate_hypersurface_3volume(double T_cut) {
     // this function calculates the surface area of an isothermal hyper-surface
     // at a give temperature T_cut [GeV]
     // the output volume V_3 = int u^\mu d^3\sigma_\mu is in [fm^3]
     // deta = 1
-   
+
     cout << "compute 3-volume at T = " << T_cut << " GeV ... " << endl;
     // first find the hyper-surface
     void* hydro_ptr;
@@ -997,7 +1006,7 @@ double FluidcellStatistic::calculate_hypersurface_3volume(double T_cut) {
              << "can not open the file hyper_surface_2+1d.dat!" << endl;
         exit(1);
     }
-    
+
     double volume = 0.0;
     double tau, x, y, da0, da1, da2, vx, vy, T;
     surf >> tau >> x >> y >> da0 >> da1 >> da2 >> T >> vx >> vy;

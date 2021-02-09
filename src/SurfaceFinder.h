@@ -6,7 +6,6 @@
 #include "./Hydroinfo_MUSIC.h"
 #include "./ParameterReader.h"
 
-using namespace std;
 
 class SurfaceFinder {
  private:

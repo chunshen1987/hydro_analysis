@@ -10,11 +10,10 @@
 #include <string>
 #include <fstream>
 
-#include "./Hydroinfo_h5.h"
-#include "./Hydroinfo_MUSIC.h"
-#include "./ParameterReader.h"
+#include "Hydroinfo_h5.h"
+#include "Hydroinfo_MUSIC.h"
+#include "ParameterReader.h"
 
-using namespace std;
 
 class FluidcellStatistic {
  private:
