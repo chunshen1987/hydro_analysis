@@ -25,7 +25,6 @@
 #include "ParameterReader.h"
 #include "SurfaceFinder.h"
 
-using namespace std;
 
 int main(int argc, char *argv[]) {
     ParameterReader *paraRdr = new ParameterReader();
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
     paraRdr->echo();
 
     int load_viscous = paraRdr->getVal("load_viscous_info");
-    int hydro_type = paraRdr->getVal("hydro_type");
+    int hydro_type   = paraRdr->getVal("hydro_type");
 
     void* hydroinfo_ptr_in;
 
@@ -94,7 +93,8 @@ int main(int argc, char *argv[]) {
     // surface_ptr->Find_full_hypersurface();
 
     sw.toc();
-    cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
+    std::cout << "totally takes : " << sw.takeTime() << " seconds."
+              << std::endl;
 
     return(0);
 }
