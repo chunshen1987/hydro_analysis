@@ -43,6 +43,7 @@ class Hydroinfo_MUSIC {
     std::vector<fluidCell_2D> lattice_2D;  // array to store hydro information
     std::vector<fluidCell_3D> lattice_3D;  // array to store hydro information
     std::vector<fluidCell_3D_ideal> lattice_3D_ideal;
+    std::vector<fluidCell_3D_ideal_with_EM> lattice_3D_ideal_withEM_;
     std::vector<int> idx_map_;
 
  public:
@@ -65,6 +66,8 @@ class Hydroinfo_MUSIC {
 
     void getHydroValues(float x, float y, float z, float t,
                         fluidCell *info);
+    void getHydroValuesWithEMFields(
+        float x, float y, float z, float t, fluidCellIdealWithEM* info);
     void output_temperature_evolution(std::string filename_base);
     void update_grid_info(float tau0, float tau_max, float dtau,
                           float x_max, float dx, float z_max, float dz);

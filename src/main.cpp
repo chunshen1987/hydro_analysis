@@ -74,23 +74,42 @@ int main(int argc, char *argv[]) {
         int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         hydroinfo_ptr_in = hydroinfo_ptr;
+    } else if (hydro_type == 13) {
+        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        int hydro_mode = 13;
+        int nskip_tau = 1;
+        hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
+        hydroinfo_ptr_in = hydroinfo_ptr;
     } else {
         cout << "main: unrecognized hydro_type = " << hydro_type << endl;
         exit(1);
     }
 
-    FluidcellStatistic fluidcellanalysis(hydroinfo_ptr_in, paraRdr);
-    fluidcellanalysis.outputTempasTauvsX();
-    fluidcellanalysis.outputKnudersonNumberasTauvsX();
-    fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
-    //double T_cut = paraRdr->getVal("T_cut");
-    //fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
-    fluidcellanalysis.output_temperature_vs_avg_utau();
-    fluidcellanalysis.output_flowvelocity_vs_tau();
+    if (hydro_type == 13) {
+        fluidCellIdealWithEM *Infoptr = new fluidCellIdealWithEM;
+        Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr = (Hydroinfo_MUSIC*) hydroinfo_ptr_in;
+        double t = 0.1;
+        hydroinfo_MUSIC_ptr->getHydroValuesWithEMFields(0., 0., 0., t, Infoptr);
+        cout << "t = " << t << " fm, "
+             << "T = " << Infoptr->temperature << " GeV, "
+             << "eEx = " << Infoptr->Ex << " GeV^2, "
+             << "eEy = " << Infoptr->Ey << " GeV^2, "
+             << "eBx = " << Infoptr->Bx << " GeV^2, "
+             << "eBy = " << Infoptr->By << " GeV^2" << endl;
+    } else {
+        FluidcellStatistic fluidcellanalysis(hydroinfo_ptr_in, paraRdr);
+        fluidcellanalysis.outputTempasTauvsX();
+        fluidcellanalysis.outputKnudersonNumberasTauvsX();
+        fluidcellanalysis.outputinverseReynoldsNumberasTauvsX();
+        //double T_cut = paraRdr->getVal("T_cut");
+        //fluidcellanalysis.analysis_hydro_volume_for_photon(T_cut);
+        fluidcellanalysis.output_temperature_vs_avg_utau();
+        fluidcellanalysis.output_flowvelocity_vs_tau();
 
-    // construct freeze-out hyper-surface
-    // SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
-    // surface_ptr->Find_full_hypersurface();
+        // construct freeze-out hyper-surface
+        // SurfaceFinder* surface_ptr = new SurfaceFinder(hydroinfo_ptr, paraRdr);
+        // surface_ptr->Find_full_hypersurface();
+    }
 
     sw.toc();
     std::cout << "totally takes : " << sw.takeTime() << " seconds."

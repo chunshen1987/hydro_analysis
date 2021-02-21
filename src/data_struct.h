@@ -13,6 +13,14 @@ struct fluidCell {
 };
 
 
+struct fluidCellIdealWithEM {
+   float ed, sd, temperature, pressure;
+   float vx, vy, vz;
+   float Ex, Ey, Ez;
+   float Bx, By, Bz;
+};
+
+
 struct fluidCell_2D {
     float temperature;
     float ux, uy, ueta;
@@ -54,5 +62,16 @@ struct fluidCell_3D_new {
     float pi22, pi23;
     float bulkPi;
 };
+
+
+struct fluidCell_3D_ideal_with_EM {
+    int itau, ix, iy, ieta;
+    float temperature;
+    float ed, pressure;
+    float ux, uy, uz;
+    float Ex, Ey, Ez;
+    float Bx, By, Bz;
+};
+
 
 #endif  // DATA_STRUCT_H_
